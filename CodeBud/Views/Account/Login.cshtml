@@ -1,0 +1,24 @@
+﻿@{
+    ViewBag.Title = "Giriş Yap";
+}
+
+<h2>Giriş Yap</h2>
+
+@using (Html.BeginForm())
+{
+    <label>Kullanıcı Adı:</label>
+    <input type="text" name="username" required />
+
+    <label>Şifre:</label>
+    <input type="password" name="password" required />
+
+    <br />
+    <br />
+    <input type="submit" value="Giriş Yap" />
+
+    <p style="color:red">@ViewBag.Error</p>
+}
+
+<hr />
+<p>Hesabınız yok mu?</p>
+<a href="@Url.Action("Register", "Account")" class="btn btn-primary">Kayıt Ol</a>
