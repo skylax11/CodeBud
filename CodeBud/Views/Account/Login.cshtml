@@ -1,24 +1,44 @@
 ﻿@{
     ViewBag.Title = "Giriş Yap";
+    Layout = "~/Views/Shared/_Layout.cshtml"; // varsa
 }
 
-<h2>Giriş Yap</h2>
+<div class="container-fluid min-vh-100 d-flex justify-content-center align-items-center bg-light">
+    <div class="card shadow p-4" style="width: 100%; max-width: 400px;">
+        <div class="text-center mb-4">
+            <h2 class="fw-bold text-primary">Giriş Yap</h2>
+            <p class="text-muted">Lütfen hesabınızla giriş yapın</p>
+        </div>
 
-@using (Html.BeginForm())
-{
-    <label>Kullanıcı Adı:</label>
-    <input type="text" name="username" required />
+        @using (Html.BeginForm("Login", "Account", FormMethod.Post))
+        {
+            <div class="mb-3">
+                <label class="form-label">Kullanıcı Adı</label>
+                <input type="text" name="username" class="form-control" placeholder="kullaniciadi123" required />
+            </div>
 
-    <label>Şifre:</label>
-    <input type="password" name="password" required />
+            <div class="mb-3">
+                <label class="form-label">Şifre</label>
+                <input type="password" name="password" class="form-control" placeholder="••••••••" required />
+            </div>
 
-    <br />
-    <br />
-    <input type="submit" value="Giriş Yap" />
+            if (!string.IsNullOrEmpty(ViewBag.Error as string))
+            {
+                <div class="alert alert-danger text-center" role="alert">
+                    @ViewBag.Error
+                </div>
+            }
 
-    <p style="color:red">@ViewBag.Error</p>
-}
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary">Giriş Yap</button>
+            </div>
+        }
 
-<hr />
-<p>Hesabınız yok mu?</p>
-<a href="@Url.Action("Register", "Account")" class="btn btn-primary">Kayıt Ol</a>
+        <hr class="my-4" />
+
+        <div class="text-center">
+            <p class="mb-2">Hesabınız yok mu?</p>
+            <a href="@Url.Action("Register", "Account")" class="btn btn-outline-secondary w-100">Kayıt Ol</a>
+        </div>
+    </div>
+</div>
