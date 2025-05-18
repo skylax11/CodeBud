@@ -10,20 +10,11 @@ namespace MyProject.Web.Controllers
     public class AccountController : Controller
     {
         private readonly SessionService _sessionService = new SessionService();
-        private readonly AppDbContext _db = new AppDbContext();
+        public static readonly AppDbContext _db = new AppDbContext();
 
         [HttpGet]
         public ActionResult Register()
         {
-            var currentUser = _sessionService.GetCurrentUser();
-            if (currentUser != null)
-            {
-                if (currentUser.Role == "Admin")
-                    return RedirectToAction("Index", "Admin");
-                else
-                    return RedirectToAction("Index", "User");
-            }
-
             return View(new UserModel());
         }
 
@@ -51,15 +42,6 @@ namespace MyProject.Web.Controllers
         [HttpGet]
         public ActionResult Login()
         {
-            var currentUser = _sessionService.GetCurrentUser();
-            if (currentUser != null)
-            {
-                if (currentUser.Role == "Admin")
-                    return RedirectToAction("Index", "Admin");
-                else
-                    return RedirectToAction("Index", "User");
-            }
-
             return View();
         }
 
