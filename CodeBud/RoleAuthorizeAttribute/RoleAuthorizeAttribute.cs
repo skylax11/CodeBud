@@ -2,7 +2,7 @@
 using System.Web;
 using System.Web.Mvc;
 using CodeBud.SessionService;
-using CodeBud.Models;
+
 
 namespace CodeBud.Web.Filters
 {
