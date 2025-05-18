@@ -1,11 +1,10 @@
 ﻿using CodeBud.Web.Filters;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using CodeBud.SessionService;
-using System.IO;
+using CodeBud.ExternalLib; // ← Fotoğraf servisi burada
 using MyProject.Web.Controllers;
 
 namespace CodeBud.Controllers
@@ -29,7 +28,7 @@ namespace CodeBud.Controllers
             ViewBag.Username = user?.Username;
             ViewBag.Role = user?.Role;
 
-            // Eğer kullanıcıda kayıtlı ImageURL varsa ve dosya varsa onu göster, yoksa placeholder
+            // Eğer kullanıcıda ImageURL varsa ve fiziksel dosya varsa onu göster
             string virtualPath = string.IsNullOrEmpty(user.ImageURL) ? "~/Photos/default.jpg" : user.ImageURL;
             string physicalPath = Server.MapPath(virtualPath);
 
@@ -45,32 +44,29 @@ namespace CodeBud.Controllers
         {
             var user = _sessionService.GetCurrentUser();
 
-            if (profilePicture != null && profilePicture.ContentLength > 0)
+            try
             {
-                string fileExtension = Path.GetExtension(profilePicture.FileName).ToLower();
-                string[] allowedExtensions = { ".jpg", ".jpeg", ".png" };
-
-                if (!allowedExtensions.Contains(fileExtension))
+                if (profilePicture != null && profilePicture.ContentLength > 0)
                 {
-                    TempData["UploadError"] = "Sadece JPG ve PNG dosyaları yükleyebilirsiniz.";
-                    return RedirectToAction("ProfilePage");
+                    // Servisle fotoğrafı yükle
+                    var photoService = new PhotoUploadService(Server.MapPath("~"));
+                    string relativePath = photoService.UploadProfilePhoto(profilePicture, user.Username); // dosya adı: username.jpg
+
+                    // Veritabanına yolu kaydet
+                    var dbUser = AccountController._db.Users.FirstOrDefault(x => x.Id == user.Id);
+                    if (dbUser != null)
+                    {
+                        dbUser.ImageURL = "~" + relativePath; // dikkat: "~" ekliyoruz çünkü Server.MapPath böyle çalışır
+                        AccountController._db.SaveChanges();
+
+                        _sessionService.SetUserSession(dbUser);
+
+                    }
                 }
-
-                // Profil fotoğrafı adı kullanıcı ID'sine göre verilir
-                string fileName = $"{user.Id}{fileExtension}";
-                string virtualPath = $"~/Photos/{fileName}";
-                string physicalPath = Server.MapPath(virtualPath);
-
-                // Fotoğrafı fiziksel olarak kaydet
-                profilePicture.SaveAs(physicalPath);
-
-                // Veritabanına SANAL yolu yaz
-                var dbUser = AccountController._db.Users.FirstOrDefault(x => x.Id == user.Id);
-                if (dbUser != null)
-                {
-                    dbUser.ImageURL = virtualPath;
-                    AccountController._db.SaveChanges();
-                }
+            }
+            catch (Exception ex)
+            {
+                TempData["UploadError"] = "Fotoğraf yüklenemedi: " + ex.Message;
             }
 
             return RedirectToAction("ProfilePage");
