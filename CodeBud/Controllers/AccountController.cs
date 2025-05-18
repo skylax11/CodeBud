@@ -1,16 +1,19 @@
-﻿using System.Linq;
+﻿using System.Threading.Tasks;
+using System.Web;
 using System.Web.Mvc;
-using CodeBud.Models;
-using CodeBud.SessionService;
+using Microsoft.Owin.Security;
 using CodeBud.DbContext;
 using CodeBud.Models.Entities;
+using CodeBud.SessionService;
+using System.Linq;
 
 namespace MyProject.Web.Controllers
 {
     public class AccountController : Controller
     {
         private readonly SessionService _sessionService = new SessionService();
-        private readonly AppDbContext _db = new AppDbContext();
+        public static readonly AppDbContext _db = new AppDbContext();
+
 
         [HttpGet]
         public ActionResult Register()
@@ -19,54 +22,102 @@ namespace MyProject.Web.Controllers
         }
 
         [HttpPost]
-        public ActionResult Register(UserModel model)
+[ValidateAntiForgeryToken]
+public ActionResult Register(UserModel model)
+{
+    if (ModelState.IsValid)
+    {
+        var existingUser = _db.Users.FirstOrDefault(u => u.Username == model.Username);
+        if (existingUser != null)
         {
-            if (ModelState.IsValid)
-            {
-                var existingUser = _db.Users.FirstOrDefault(u => u.Username == model.Username);
-                if (existingUser != null)
-                {
-                    ViewBag.Error = "Bu kullanıcı adı zaten alınmış.";
-                    return View();
-                }
-
-                _db.Users.Add(model);
-                _db.SaveChanges();
-
-                return RedirectToAction("Login");
-            }
-
-            return View(model);
+            ViewBag.Error = "Bu kullanıcı adı zaten alınmış.";
+            return View();
         }
+
+        model.Password = BCrypt.Net.BCrypt.HashPassword(model.Password);
+        _db.Users.Add(model);
+        _db.SaveChanges();
+        return RedirectToAction("Login");
+    }
+
+    return View(model);
+}
 
         [HttpGet]
-        public ActionResult Login()
+public ActionResult Login()
+{
+    return View();
+}
+
+[HttpPost]
+[ValidateAntiForgeryToken]
+public ActionResult Login(string username, string password)
+{
+    var user = _db.Users.FirstOrDefault(u => u.Username == username);
+    if (user != null && BCrypt.Net.BCrypt.Verify(password, user.Password))
+    {
+        _sessionService.SetUserSession(user);
+
+        if (user.Role == "Admin")
+            return RedirectToAction("Index", "Admin");
+        else
+            return RedirectToAction("Index", "User");
+    }
+
+    ViewBag.Error = "Kullanıcı adı veya şifre yanlış.";
+    return View();
+}
+        // ✅ Google ile giriş
+        public void LoginWithGoogle()
         {
-            return View();
+            if (!Request.IsAuthenticated)
+            {
+                HttpContext.GetOwinContext().Authentication.Challenge(
+                    new AuthenticationProperties
+                    {
+                        RedirectUri = "/Account/GoogleCallback"
+                    },
+                    "Google"
+                );
+
+                Response.StatusCode = 401;
+            }
         }
 
-        [HttpPost]
-        public ActionResult Login(string username, string password)
+        // ✅ Google'dan döndükten sonra kullanıcıyı yakala
+        public async Task<ActionResult> GoogleCallback()
         {
-            var user = _db.Users.FirstOrDefault(u => u.Username == username && u.Password == password);
+            var ctx = Request.GetOwinContext();
+            var result = await ctx.Authentication.AuthenticateAsync("ExternalCookie");
 
-            if (user != null)
+            System.Diagnostics.Debug.WriteLine("Result null mu? => " + (result == null));
+            System.Diagnostics.Debug.WriteLine("Identity null mu? => " + (result?.Identity == null));
+            System.Diagnostics.Debug.WriteLine("Authenticated mi? => " + (result?.Identity?.IsAuthenticated ?? false));
+
+            if (result?.Identity != null && result.Identity.IsAuthenticated)
             {
-                _sessionService.SetUserSession(user);
+                var username = result.Identity.Name ?? "google_user";
 
-                if (user.Role == "Admin")
-                    return RedirectToAction("Index", "Admin");
-                else
-                    return RedirectToAction("Index", "User");
+                // Kullanıcı veritabanında var mı?
+                var user = _db.Users.FirstOrDefault(u => u.Username == username);
+                if (user == null)
+                {
+                    user = new UserModel
+                    {
+                        Username = username,
+                        Password = null,
+                        Role = "User"
+                    };
+
+                    _db.Users.Add(user);
+                    _db.SaveChanges();
+                }
+
+                _sessionService.SetUserSession(user);
+                return RedirectToAction("Index", user.Role == "Admin" ? "Admin" : "User");
             }
 
-            ViewBag.Error = "Kullanıcı adı veya şifre yanlış.";
-            return View();
-        }
-
-        public ActionResult AccessDenied()
-        {
-            return View();
+            return Content("❌ Kullanıcı doğrulanamadı.");
         }
 
         public ActionResult Logout()
