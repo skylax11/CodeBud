@@ -14,6 +14,34 @@ namespace MyProject.Web.Controllers
         private readonly SessionService _sessionService = new SessionService();
         public static readonly AppDbContext _db = new AppDbContext();
 
+
+        [HttpGet]
+        public ActionResult Register()
+        {
+            return View(new UserModel());
+        }
+
+        [HttpPost]
+        public ActionResult Register(UserModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var existingUser = _db.Users.FirstOrDefault(u => u.Username == model.Username);
+                if (existingUser != null)
+                {
+                    ViewBag.Error = "Bu kullanıcı adı zaten alınmış.";
+                    return View();
+                }
+
+                _db.Users.Add(model);
+                _db.SaveChanges();
+
+                return RedirectToAction("Login");
+            }
+
+            return View(model);
+        }
+
         [HttpGet]
         public ActionResult Login()
         {
