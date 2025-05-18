@@ -35,7 +35,7 @@
 
                 <button type="submit" class="btn btn-success w-100">Kayıt Ol</button>
 
-                @if (!string.IsNullOrEmpty(ViewBag.Error as string))
+                if (!string.IsNullOrEmpty(ViewBag.Error as string))
                 {
                     <div class="alert alert-danger mt-3 text-center">@ViewBag.Error</div>
                 }
