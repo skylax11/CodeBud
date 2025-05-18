@@ -163,6 +163,8 @@
     <Compile Include="Models\Repository\AppDbContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RoleAuthorizeAttribute\RoleAuthorizeAttribute.cs" />
+    <Compile Include="Services\UserService.cs" />
+    <Compile Include="Services\TagSuggestionService.cs" />
     <Compile Include="SessionService\SessionService.cs" />
   </ItemGroup>
   <ItemGroup>
