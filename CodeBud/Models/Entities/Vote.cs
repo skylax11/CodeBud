@@ -16,7 +16,7 @@ namespace CodeBud.Models.Entities
 
         [ForeignKey("User")]
         public int UserId { get; set; }
-        public User User { get; set; }
+        public UserModel User { get; set; }
 
         [ForeignKey("Question")]
         public int? QuestionId { get; set; }

@@ -1,0 +1,34 @@
+﻿@model CodeBud.Models.Entities.UserModel
+
+@{
+    ViewBag.Title = "Kayıt Ol";
+}
+
+<h2>Kayıt Ol</h2>
+
+@using (Html.BeginForm())
+{
+    <label>Ad:</label>
+    @Html.TextBoxFor(m => m.name)
+
+    <label>Soyad:</label>
+    @Html.TextBoxFor(m => m.surName)
+
+    <label>Kullanıcı Adı:</label>
+    @Html.TextBoxFor(m => m.Username)
+
+    <label>Şifre:</label>
+    @Html.PasswordFor(m => m.Password)
+
+    <label>Email:</label>
+    @Html.TextBoxFor(m => m.Email)
+
+    <label>Rol:</label>
+    @Html.DropDownListFor(m => m.Role, new SelectList(new[] { "User", "Admin" }))
+
+    <br />
+    <br />
+    <input type="submit" value="Kayıt Ol" />
+
+    <p style="color:red">@ViewBag.Error</p>
+}

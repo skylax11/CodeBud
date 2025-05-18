@@ -22,11 +22,8 @@ namespace CodeBud.Models.Entities
 
         [ForeignKey("User")]
         public int UserId { get; set; }
-        public User User { get; set; }
-
-        public ICollection<Answer> Answers { get; set; }
-        public ICollection<Comment> Comments { get; set; }
-        public ICollection<QuestionTag> QuestionTags { get; set; }
-        public ICollection<Vote> Votes { get; set; }
+        public UserModel User { get; set; }
+        
+        // İLİŞKİLER İÇİN AYRICA CLASSLAR EKLENECEK.
     }
 }
