@@ -22,47 +22,51 @@ namespace MyProject.Web.Controllers
         }
 
         [HttpPost]
-        public ActionResult Register(UserModel model)
+[ValidateAntiForgeryToken]
+public ActionResult Register(UserModel model)
+{
+    if (ModelState.IsValid)
+    {
+        var existingUser = _db.Users.FirstOrDefault(u => u.Username == model.Username);
+        if (existingUser != null)
         {
-            if (ModelState.IsValid)
-            {
-                var existingUser = _db.Users.FirstOrDefault(u => u.Username == model.Username);
-                if (existingUser != null)
-                {
-                    ViewBag.Error = "Bu kullanıcı adı zaten alınmış.";
-                    return View();
-                }
-
-                _db.Users.Add(model);
-                _db.SaveChanges();
-
-                return RedirectToAction("Login");
-            }
-
-            return View(model);
+            ViewBag.Error = "Bu kullanıcı adı zaten alınmış.";
+            return View();
         }
+
+        model.Password = BCrypt.Net.BCrypt.HashPassword(model.Password);
+        _db.Users.Add(model);
+        _db.SaveChanges();
+        return RedirectToAction("Login");
+    }
+
+    return View(model);
+}
 
         [HttpGet]
-        public ActionResult Login()
-        {
-            return View();
-        }
+public ActionResult Login()
+{
+    return View();
+}
 
-        [HttpPost]
-        public ActionResult Login(string username, string password)
-        {
-            var user = _db.Users.FirstOrDefault(u => u.Username == username && u.Password == password);
+[HttpPost]
+[ValidateAntiForgeryToken]
+public ActionResult Login(string username, string password)
+{
+    var user = _db.Users.FirstOrDefault(u => u.Username == username);
+    if (user != null && BCrypt.Net.BCrypt.Verify(password, user.Password))
+    {
+        _sessionService.SetUserSession(user);
 
-            if (user != null)
-            {
-                _sessionService.SetUserSession(user);
-                return RedirectToAction("Index", user.Role == "Admin" ? "Admin" : "User");
-            }
+        if (user.Role == "Admin")
+            return RedirectToAction("Index", "Admin");
+        else
+            return RedirectToAction("Index", "User");
+    }
 
-            ViewBag.Error = "Kullanıcı adı veya şifre yanlış.";
-            return View();
-        }
-
+    ViewBag.Error = "Kullanıcı adı veya şifre yanlış.";
+    return View();
+}
         // ✅ Google ile giriş
         public void LoginWithGoogle()
         {
