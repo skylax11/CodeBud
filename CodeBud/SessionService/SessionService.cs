@@ -1,5 +1,6 @@
 ﻿using System.Web;
 using CodeBud.Models;
+using CodeBud.Models.Entities;
 using Newtonsoft.Json;
 
 namespace CodeBud.SessionService
