@@ -22,6 +22,8 @@ namespace CodeBud.Models.Entities
         [Required]
         public string Role { get; set; }
 
+        public string ImageURL { get; set; }
+
         // İLİŞKİLER İÇİN AYRICA CLASSLAR EKLENECEK.
 
     }
