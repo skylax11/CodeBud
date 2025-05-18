@@ -21,7 +21,27 @@ namespace MyProject.Web.Controllers
             return View(new UserModel());
         }
 
-        V
+        [HttpPost]
+[ValidateAntiForgeryToken]
+public ActionResult Register(UserModel model)
+{
+    if (ModelState.IsValid)
+    {
+        var existingUser = _db.Users.FirstOrDefault(u => u.Username == model.Username);
+        if (existingUser != null)
+        {
+            ViewBag.Error = "Bu kullanıcı adı zaten alınmış.";
+            return View();
+        }
+
+        model.Password = BCrypt.Net.BCrypt.HashPassword(model.Password);
+        _db.Users.Add(model);
+        _db.SaveChanges();
+        return RedirectToAction("Login");
+    }
+
+    return View(model);
+}
 
         [HttpGet]
 public ActionResult Login()
