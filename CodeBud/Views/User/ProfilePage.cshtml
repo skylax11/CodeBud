@@ -1,0 +1,30 @@
+﻿@{
+    ViewBag.Title = "Profil Sayfası";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <div class="card mx-auto" style="max-width: 500px;">
+        <div class="card-body text-center">
+
+            <!-- Profil resmi -->
+<img src="@Url.Content(ViewBag.ProfileImageUrl)" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;" alt="Profil Resmi" />
+
+            <!-- Kullanıcı bilgileri -->
+            <h4 class="card-title">@ViewBag.FullName</h4>
+            <p class="card-text text-muted">@ViewBag.Username</p>
+            <p class="card-text"><strong>Rol:</strong> @ViewBag.Role</p>
+
+            <!-- PROFİL FOTOĞRAF YÜKLEME FORMU (Html.BeginForm ile) -->
+            @using (Html.BeginForm("UploadProfilePicture", "User", FormMethod.Post, new { enctype = "multipart/form-data" }))
+            {
+                <div class="form-group">
+                    <input type="file" name="profilePicture" accept="image/*" class="form-control" required />
+                </div>
+                <button type="submit" class="btn btn-success mt-2">Fotoğrafı Güncelle</button>
+            }
+
+            <a href="@Url.Action("Index", "User")" class="btn btn-primary mt-4">Ana Menüye Dön</a>
+        </div>
+    </div>
+</div>

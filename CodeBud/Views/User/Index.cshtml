@@ -1,0 +1,27 @@
+﻿@{
+    ViewBag.Title = "Kullanıcı Paneli";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="@Url.Action("Index", "Home")">Ana Menü</a>
+
+        <div class="collapse navbar-collapse justify-content-end">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("ProfilePage", "User")">Profil</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-danger" href="@Url.Action("Logout", "User")">Çıkış Yap</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <h2>Kullanıcı Paneli</h2>
+    <p>Hoş geldiniz, <strong>@ViewBag.Username</strong>!</p>
+    <p>Rolünüz: <strong>@ViewBag.Role</strong></p>
+</div>
