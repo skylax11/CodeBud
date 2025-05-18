@@ -1,18 +1,19 @@
 ﻿using System;
+using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using CodeBud.SessionService;
-
+using System.Web.Routing;
 
 namespace CodeBud.Web.Filters
 {
     public class RoleAuthorizeAttribute : AuthorizeAttribute
     {
-        private readonly string _requiredRole;
+        private readonly string[] _requiredRoles;
 
-        public RoleAuthorizeAttribute(string requiredRole)
+        public RoleAuthorizeAttribute(params string[] requiredRoles)
         {
-            _requiredRole = requiredRole;
+            _requiredRoles = requiredRoles;
         }
 
         public override void OnAuthorization(AuthorizationContext filterContext)
@@ -20,13 +21,20 @@ namespace CodeBud.Web.Filters
             var sessionService = new SessionService.SessionService();
             var user = sessionService.GetCurrentUser();
 
-            if (user == null || user.Role != _requiredRole)
+            if (user == null)
             {
-                // Access Denied sayfasına yönlendir
+                System.Diagnostics.Debug.WriteLine($"[AUTH] Oturum yok. IP: {filterContext.HttpContext.Request.UserHostAddress}");
+
                 filterContext.Result = new RedirectToRouteResult(
-                    new System.Web.Routing.RouteValueDictionary(
-                        new { controller = "Account", action = "AccessDenied" }
-                    )
+                    new RouteValueDictionary(new { controller = "Account", action = "Login" })
+                );
+            }
+            else if (!_requiredRoles.Contains(user.Role))
+            {
+                System.Diagnostics.Debug.WriteLine($"[AUTH] Yetkisiz erişim: Kullanıcı rolü = {user.Role}, Gerekli roller = {string.Join(", ", _requiredRoles)}. IP: {filterContext.HttpContext.Request.UserHostAddress}");
+
+                filterContext.Result = new RedirectToRouteResult(
+                    new RouteValueDictionary(new { controller = "Account", action = "AccessDenied" })
                 );
             }
         }

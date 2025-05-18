@@ -8,13 +8,19 @@
 
 @using (Html.BeginForm())
 {
+    <label>Ad:</label>
+    @Html.TextBoxFor(m => m.name)
+
+    <label>Soyad:</label>
+    @Html.TextBoxFor(m => m.surName)
+
     <label>Kullanıcı Adı:</label>
     @Html.TextBoxFor(m => m.Username)
 
     <label>Şifre:</label>
     @Html.PasswordFor(m => m.Password)
 
-    <label>Şifre:</label>
+    <label>Email:</label>
     @Html.TextBoxFor(m => m.Email)
 
     <label>Rol:</label>
