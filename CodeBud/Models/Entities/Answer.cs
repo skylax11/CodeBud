@@ -18,13 +18,7 @@ namespace CodeBud.Models.Entities
         [Required]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-        // İlişkiler
-        [ForeignKey("User")]
-        public int UserId { get; set; }
-        public User User { get; set; }
+        // İLİŞKİLER İÇİN AYRICA CLASSLAR EKLENECEK.
 
-        [ForeignKey("Question")]
-        public int QuestionId { get; set; }
-        public Question Question { get; set; }
     }
 }

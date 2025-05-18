@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CodeBud.DbContext;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -8,8 +9,11 @@ namespace CodeBud.Controllers
 {
     public class HomeController : Controller
     {
+        AppDbContext appDbContext;
         public ActionResult Index()
         {
+            appDbContext = new AppDbContext();
+            appDbContext.Database.CreateIfNotExists();
             return View();
         }
 
