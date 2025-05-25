@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+
 using System.Web;
 using System.Web.Mvc;
 using Microsoft.Owin.Security;
@@ -6,6 +6,14 @@ using CodeBud.DbContext;
 using CodeBud.Models.Entities;
 using CodeBud.SessionService;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNet.Identity;
+using System.Net;
+using System.Security.Claims;
+using System;
+using System.Collections.Generic;
+using Newtonsoft.Json;
+using System.Net.Http;
 
 namespace MyProject.Web.Controllers
 {
@@ -14,7 +22,6 @@ namespace MyProject.Web.Controllers
         private readonly SessionService _sessionService = new SessionService();
         public static readonly AppDbContext _db = new AppDbContext();
 
-
         [HttpGet]
         public ActionResult Register()
         {
@@ -22,108 +29,92 @@ namespace MyProject.Web.Controllers
         }
 
         [HttpPost]
-[ValidateAntiForgeryToken]
-public ActionResult Register(UserModel model)
-{
-    if (ModelState.IsValid)
-    {
-        var existingUser = _db.Users.FirstOrDefault(u => u.Username == model.Username);
-        if (existingUser != null)
+        [ValidateAntiForgeryToken]
+        public ActionResult Register(UserModel model)
         {
-            ViewBag.Error = "Bu kullanıcı adı zaten alınmış.";
+            var existingUser = _db.Users.FirstOrDefault(u => u.Username == model.Username);
+            if (existingUser != null)
+            {
+                ViewBag.Error = "Bu kullanıcı adı zaten alınmış.";
+                return View();
+            }
+
+            model.HashedPassword = BCrypt.Net.BCrypt.HashPassword(model.Password);
+            _db.Users.Add(model);
+            int turned = _db.SaveChanges();
+
+            if (turned != 0)
+                return RedirectToAction("Login");
+            else
+                return View(model);
+        }
+        
+        [HttpGet]
+        public ActionResult Login()
+        {
             return View();
         }
-
-        model.Password = BCrypt.Net.BCrypt.HashPassword(model.Password);
-        _db.Users.Add(model);
-        _db.SaveChanges();
-        return RedirectToAction("Login");
-    }
-
-    return View(model);
-}
-
-        [HttpGet]
-public ActionResult Login()
-{
-    return View();
-}
-
-[HttpPost]
-[ValidateAntiForgeryToken]
-public ActionResult Login(string username, string password)
-{
-    var user = _db.Users.FirstOrDefault(u => u.Username == username);
-    if (user != null && BCrypt.Net.BCrypt.Verify(password, user.Password))
-    {
-        _sessionService.SetUserSession(user);
-
-        if (user.Role == "Admin")
-            return RedirectToAction("Index", "Admin");
-        else
-            return RedirectToAction("Index", "User");
-    }
-
-    ViewBag.Error = "Kullanıcı adı veya şifre yanlış.";
-    return View();
-}
-        // ✅ Google ile giriş
-        public void LoginWithGoogle()
+        
+        [HttpPost]
+        public ActionResult Login(string username, string password)
         {
-            if (!Request.IsAuthenticated)
+            var user = _db.Users.FirstOrDefault(u => u.Username == username);
+            if (user != null && BCrypt.Net.BCrypt.Verify(password, user.HashedPassword))
             {
-                HttpContext.GetOwinContext().Authentication.Challenge(
-                    new AuthenticationProperties
-                    {
-                        RedirectUri = "/Account/GoogleCallback"
-                    },
-                    "Google"
-                );
-
-                Response.StatusCode = 401;
-            }
-        }
-
-        // ✅ Google'dan döndükten sonra kullanıcıyı yakala
-        public async Task<ActionResult> GoogleCallback()
-        {
-            var ctx = Request.GetOwinContext();
-            var result = await ctx.Authentication.AuthenticateAsync("ExternalCookie");
-
-            System.Diagnostics.Debug.WriteLine("Result null mu? => " + (result == null));
-            System.Diagnostics.Debug.WriteLine("Identity null mu? => " + (result?.Identity == null));
-            System.Diagnostics.Debug.WriteLine("Authenticated mi? => " + (result?.Identity?.IsAuthenticated ?? false));
-
-            if (result?.Identity != null && result.Identity.IsAuthenticated)
-            {
-                var username = result.Identity.Name ?? "google_user";
-
-                // Kullanıcı veritabanında var mı?
-                var user = _db.Users.FirstOrDefault(u => u.Username == username);
-                if (user == null)
-                {
-                    user = new UserModel
-                    {
-                        Username = username,
-                        Password = null,
-                        Role = "User"
-                    };
-
-                    _db.Users.Add(user);
-                    _db.SaveChanges();
-                }
-
                 _sessionService.SetUserSession(user);
-                return RedirectToAction("Index", user.Role == "Admin" ? "Admin" : "User");
+        
+                if (user.Role == "Admin")
+                    return RedirectToAction("Index", "Admin");
+                else
+                    return RedirectToAction("Index", "User");
+            }
+        
+            ViewBag.Error = "Kullanıcı adı veya şifre yanlış.";
+            return View();
+        }
+        private IAuthenticationManager AuthenticationManager => HttpContext.GetOwinContext().Authentication;
+
+        [AllowAnonymous]
+        public ActionResult ExternalLogin(string provider, string returnUrl = "/")
+        {
+            var properties = new AuthenticationProperties
+            {
+                RedirectUri = Url.Action("ExternalLoginCallback", new { ReturnUrl = returnUrl })
+            };
+
+            AuthenticationManager.Challenge(properties, provider);
+            return new HttpUnauthorizedResult(); // zorunlu
+        }
+
+        [AllowAnonymous]
+        public async Task<ActionResult> ExternalLoginCallback(string returnUrl = "/")
+        {
+            var loginInfo = await AuthenticationManager.GetExternalLoginInfoAsync();
+            if (loginInfo == null)
+            {
+                TempData["Error"] = "Giriş başarısız. Google'dan bilgi alınamadı.";
+                return RedirectToAction("Login");
             }
 
-            return Content("❌ Kullanıcı doğrulanamadı.");
+            // Oturum aç
+            var identity = new ClaimsIdentity(loginInfo.ExternalIdentity.Claims, DefaultAuthenticationTypes.ApplicationCookie);
+            AuthenticationManager.SignIn(new AuthenticationProperties { IsPersistent = true }, identity);
+
+            return Redirect(returnUrl);
         }
 
-        public ActionResult Logout()
+
+
+
+
+        private ActionResult RedirectToLocal(string returnUrl)
         {
-            _sessionService.ClearSession();
-            return RedirectToAction("Login");
+            if (Url.IsLocalUrl(returnUrl))
+                return Redirect(returnUrl);
+
+            return RedirectToAction("Index", "Home");
         }
+
+      
     }
 }
