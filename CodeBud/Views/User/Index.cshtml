@@ -1,11 +1,34 @@
 ﻿@{
     ViewBag.Title = "Kullanıcı Paneli";
-    Layout = "~/Views/Shared/_Layout.cshtml"; 
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Kullanıcı Paneli</h2>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm sticky-top">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="@Url.Action("Index", "Home")">CodeBud</a>
 
-<p>Hoş geldiniz, @ViewBag.Username!</p>
-<p>Rolünüz: @ViewBag.Role</p>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-<a href="@Url.Action("Logout", "Account")" class="btn btn-danger">Çıkış Yap</a>
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("Index", "Question")">Questions</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("Index", "Tag")">Tags</a>
+                </li>
+            </ul>
+
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("ProfilePage", "User")">Profil</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-danger" href="@Url.Action("Logout", "User")">Çıkış Yap</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

@@ -1,6 +1,6 @@
 ﻿@{
     ViewBag.Title = "Giriş Yap";
-    Layout = "~/Views/Shared/_Layout.cshtml"; // varsa
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <div class="container-fluid min-vh-100 d-flex justify-content-center align-items-center bg-light">
@@ -35,6 +35,11 @@
         }
 
         <hr class="my-4" />
+
+        <a href="@Url.Action("ExternalLogin", "Account", new { provider = "Google", returnUrl = "/" })"
+           class="btn btn-danger w-100">
+            <i class="bi bi-google me-2"></i> Google ile Giriş Yap
+        </a>
 
         <div class="text-center">
             <p class="mb-2">Hesabınız yok mu?</p>
