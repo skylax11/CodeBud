@@ -6,13 +6,10 @@
 
 <h2>Kayıt Ol</h2>
 
-@using (Html.BeginForm())
+@using (Html.BeginForm("Register", "Account", FormMethod.Post))
 {
-    <label>Ad:</label>
-    @Html.TextBoxFor(m => m.name)
 
-    <label>Soyad:</label>
-    @Html.TextBoxFor(m => m.surName)
+    @Html.AntiForgeryToken()
 
     <label>Kullanıcı Adı:</label>
     @Html.TextBoxFor(m => m.Username)
@@ -20,7 +17,7 @@
     <label>Şifre:</label>
     @Html.PasswordFor(m => m.Password)
 
-    <label>Email:</label>
+    <label>Şifre:</label>
     @Html.TextBoxFor(m => m.Email)
 
     <label>Rol:</label>

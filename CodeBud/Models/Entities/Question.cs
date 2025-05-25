@@ -23,7 +23,9 @@ namespace CodeBud.Models.Entities
         [ForeignKey("User")]
         public int UserId { get; set; }
         public UserModel User { get; set; }
-        
+        public virtual ICollection<Comment> Comments { get; set; }
+
+
         // İLİŞKİLER İÇİN AYRICA CLASSLAR EKLENECEK.
     }
 }

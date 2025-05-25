@@ -1,0 +1,44 @@
+﻿@using PagedList
+@model IPagedList<CodeBud.Models.Entities.Question>
+@using PagedList.Mvc;
+
+@{
+    ViewBag.Title = "Tüm Sorular";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">📋 Son Sorular</h2>
+         <a class="btn btn-primary" href="@Url.Action("Create", "Question")">➕ Yeni Soru Ekle</a>
+    </div>
+
+    @foreach (var q in Model)
+    {
+        <div class="card mb-3 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">@Html.DisplayFor(m => q.Title)</h5>
+                <p class="card-text text-muted small">
+                    Soruldu: @q.CreatedAt.ToString("g")
+                </p>
+                <p>@Html.Raw(q.Description.Substring(0, Math.Min(q.Description.Length, 200)) + "...")</p>
+                <a href="@Url.Action("Details", "Question", new { id = q.Id })" class="btn btn-sm btn-outline-primary">Detaylar</a>
+            </div>
+        </div>
+    }
+
+    <div class="text-center mt-4">
+        @Html.PagedListPager(Model, page => Url.Action("Index", new { page }),
+            new PagedListRenderOptions()
+            {
+                DisplayLinkToFirstPage = PagedListDisplayMode.Always,
+                DisplayLinkToLastPage = PagedListDisplayMode.Always,
+                DisplayLinkToNextPage = PagedListDisplayMode.Always,
+                DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+                MaximumPageNumbersToDisplay = 5,
+                UlElementClasses = new[] { "pagination", "justify-content-center" },
+                LiElementClasses = new[] { "page-item" }
+            })
+    </div>
+</div>

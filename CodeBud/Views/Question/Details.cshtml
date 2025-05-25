@@ -1,0 +1,109 @@
+﻿@model CodeBud.Models.Entities.Question
+
+@{
+    ViewBag.Title = "Soru Detayı";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-body">
+            <h2 class="card-title">@Model.Title</h2>
+
+            <p class="text-muted small mb-3">
+                Soruldu: @Model.CreatedAt.ToString("f")
+                @if (Model.User != null)
+                {
+                    <span>| Soran: <strong>@Model.User.Username</strong></span>
+                }
+            </p>
+
+            <hr />
+
+            <div class="card-text" style="white-space: pre-wrap;">
+                @Html.Raw(Model.Description)
+            </div>
+
+            <div class="mt-4 text-end">
+                <a href="@Url.Action("Index", "Question")" class="btn btn-outline-secondary">← Tüm Sorulara Dön</a>
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-4" />
+    <h5>💬 Yorumlar</h5>
+
+    @if (Model.Comments != null && Model.Comments.Any())
+    {
+        foreach (var comment in Model.Comments.OrderByDescending(c => c.CreatedAt))
+        {
+            CodeBud.Models.Entities.UserModel user = MyProject.Web.Controllers.AccountController._db.Users.Where(x => x.Id == comment.UserId).FirstOrDefault();
+            <div class="border rounded p-2 mb-2">
+                <small class="text-muted">@user.Username - @comment.CreatedAt.ToString("g")</small>
+                <div style="white-space: pre-wrap;">@Html.Raw(comment.Content)</div>
+            </div>
+        }
+    }
+    else
+    {
+        <p class="text-muted">Henüz yorum yok.</p>
+    }
+
+    @if (Session["CurrentUser"] != null)
+    {
+        <form method="post" action="@Url.Action("AddComment", "Question")" class="mt-3">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="questionId" value="@Model.Id" />
+
+            <div class="form-group">
+                <textarea name="commentText" id="commentText" class="form-control" rows="3" placeholder="Yorum yazın..."></textarea>
+                <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="wrapWithCode('commentText')">💡 Kodu Biçimlendir</button>
+            </div>
+
+            <button type="submit" class="btn btn-sm btn-primary mt-2">Yorumu Gönder</button>
+        </form>
+    }
+    else
+    {
+        <p class="text-muted mt-3">Yorum yapmak için giriş yapmalısınız.</p>
+    }
+</div>
+
+<style>
+    pre code {
+        display: block;
+        padding: 1em;
+        margin-bottom: 1em;
+        background-color: #f8f9fa;
+        border-left: 4px solid #dee2e6;
+        color: #212529;
+        border-radius: 6px;
+        overflow-x: auto;
+        font-family: Consolas, 'Courier New', monospace;
+        font-size: 0.95em;
+    }
+</style>
+
+<script>
+    function wrapWithCode(textareaId) {
+        var textarea = document.getElementById(textareaId);
+        var start = textarea.selectionStart;
+        var end = textarea.selectionEnd;
+
+        if (start === end) {
+            alert("Kod olarak biçimlendirmek için önce bir metin seçin.");
+            return;
+        }
+
+        var selectedText = textarea.value.substring(start, end);
+        var before = textarea.value.substring(0, start);
+        var after = textarea.value.substring(end);
+
+        var wrapped = "<pre><code>" + selectedText + "</code></pre>";
+        textarea.value = before + wrapped + after;
+
+        textarea.selectionStart = start;
+        textarea.selectionEnd = start + wrapped.length;
+        textarea.focus();
+    }
+</script>

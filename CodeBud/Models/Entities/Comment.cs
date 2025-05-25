@@ -15,9 +15,15 @@ namespace CodeBud.Models.Entities
         [Required]
         public string Content { get; set; }
 
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        [ForeignKey("Question")]
+        public int QuestionId { get; set; }
+        public virtual Question Question { get; set; }
 
-        // İLİŞKİLER İÇİN AYRICA CLASSLAR EKLENECEK.
+        [ForeignKey("User")]
+        public int UserId { get; set; }
+        public virtual UserModel User { get; set; }
+
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
 
     }
 }
