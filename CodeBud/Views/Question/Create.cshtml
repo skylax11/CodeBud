@@ -1,0 +1,68 @@
+﻿@model CodeBud.Models.Entities.Question
+
+@{
+    ViewBag.Title = "Yeni Soru Ekle";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2>Yeni Soru Ekle</h2>
+
+    @using (Html.BeginForm("Create", "Question", FormMethod.Post))
+    {
+        <div class="form-group">
+            @Html.LabelFor(m => m.Title)
+            @if (Session["CurrentUser"] != null)
+            {
+                @Html.TextBoxFor(m => m.Title, new { @class = "form-control", placeholder = "Başlık giriniz" })
+            }
+        </div>
+
+        <div class="form-group mt-3">
+            @Html.LabelFor(m => m.Description)
+            <div class="position-relative">
+                @Html.TextAreaFor(m => m.Description, new
+                {
+                    @class = "form-control w-100", // 👈 Bootstrap genişlik sınıfı
+                    @id = "questionBody",
+                    placeholder = "Sorununuzu detaylıca yazın. Kod olan kısmı seçip aşağıdaki butona basın.",
+                    rows = 12,
+                    style = "max-width: 100%;" // 👈 Ekstra garanti için
+                })
+
+
+                <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="wrapSelectedWithCode()">💡 Seçilen Kodu Biçimlendir</button>
+            </div>
+            <small class="form-text text-muted">
+                Kod bloğu için <code>&lt;pre&gt;&lt;code&gt;...&lt;/code&gt;&lt;/pre&gt;</code> otomatik eklenir.
+            </small>
+        </div>
+
+        <button type="submit" class="btn btn-success mt-4">Soruyu Gönder</button>
+    }
+</div>
+
+<script>
+    function wrapSelectedWithCode() {
+        const textarea = document.getElementById("questionBody");
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+
+        if (start === end) {
+            alert("Kod olarak biçimlendirmek için önce bir metin seçin.");
+            return;
+        }
+
+        const selectedText = textarea.value.substring(start, end);
+        const before = textarea.value.substring(0, start);
+        const after = textarea.value.substring(end);
+
+        const wrapped = "<pre><code>" + selectedText + "</code></pre>";
+        textarea.value = before + wrapped + after;
+
+        // Seçimi yeni hale getir
+        textarea.selectionStart = start;
+        textarea.selectionEnd = start + wrapped.length;
+        textarea.focus();
+    }
+</script>
