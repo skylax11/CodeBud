@@ -1,0 +1,25 @@
+﻿@model List<CodeBud.Models.Entities.Question>
+
+@{
+    ViewBag.Title = ViewBag.TagName + " Soruları";
+}
+
+<h2>@ViewBag.TagName ile Etiketlenen Sorular</h2>
+
+@if (Model.Any())
+{
+    foreach (var q in Model)
+    {
+        <div class="card mb-3 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">@q.Title</h5>
+                <p class="card-text">@Html.Raw(q.Description.Substring(0, Math.Min(q.Description.Length, 200)) + "...")</p>
+                <a href="@Url.Action("Details", "Question", new { id = q.Id })" class="btn btn-sm btn-outline-primary">Detaylar</a>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <div class="alert alert-info">Bu etikete ait henüz bir soru yok.</div>
+}
