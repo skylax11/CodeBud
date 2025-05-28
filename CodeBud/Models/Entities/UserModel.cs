@@ -20,9 +20,13 @@ namespace CodeBud.Models.Entities
         [Required]
         public string Password { get; set; }
         [Required]
+        public string HashedPassword { get; set; }
+
+        [Required]
         public string Role { get; set; }
 
         public string ImageURL { get; set; }
+
         // İLİŞKİLER İÇİN AYRICA CLASSLAR EKLENECEK.
 
     }
