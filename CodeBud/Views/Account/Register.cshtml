@@ -1,4 +1,4 @@
-﻿@model CodeBud.Models.Entities.UserModel
+@model CodeBud.Models.Entities.UserModel
 
 @{
     ViewBag.Title = "Kayıt Ol";
@@ -6,8 +6,11 @@
 
 <h2>Kayıt Ol</h2>
 
-@using (Html.BeginForm())
+@using (Html.BeginForm("Register", "Account", FormMethod.Post))
 {
+
+    @Html.AntiForgeryToken()
+
     <label>Kullanıcı Adı:</label>
     @Html.TextBoxFor(m => m.Username)
 
