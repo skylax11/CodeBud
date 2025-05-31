@@ -1,13 +1,10 @@
-
 using System.Web;
 using System.Web.Mvc;
-using Microsoft.Owin.Security;
 using CodeBud.DbContext;
 using CodeBud.Models.Entities;
 using CodeBud.SessionService;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Identity;
 using System.Net;
 using System.Security.Claims;
 using System;
@@ -72,41 +69,6 @@ namespace MyProject.Web.Controllers
             ViewBag.Error = "Kullanıcı adı veya şifre yanlış.";
             return View();
         }
-        private IAuthenticationManager AuthenticationManager => HttpContext.GetOwinContext().Authentication;
-
-        [AllowAnonymous]
-        public ActionResult ExternalLogin(string provider, string returnUrl = "/")
-        {
-            var properties = new AuthenticationProperties
-            {
-                RedirectUri = Url.Action("ExternalLoginCallback", new { ReturnUrl = returnUrl })
-            };
-
-            AuthenticationManager.Challenge(properties, provider);
-            return new HttpUnauthorizedResult(); // zorunlu
-        }
-
-        [AllowAnonymous]
-        public async Task<ActionResult> ExternalLoginCallback(string returnUrl = "/")
-        {
-            var loginInfo = await AuthenticationManager.GetExternalLoginInfoAsync();
-            if (loginInfo == null)
-            {
-                TempData["Error"] = "Giriş başarısız. Google'dan bilgi alınamadı.";
-                return RedirectToAction("Login");
-            }
-
-            // Oturum aç
-            var identity = new ClaimsIdentity(loginInfo.ExternalIdentity.Claims, DefaultAuthenticationTypes.ApplicationCookie);
-            AuthenticationManager.SignIn(new AuthenticationProperties { IsPersistent = true }, identity);
-
-            return Redirect(returnUrl);
-        }
-
-
-
-
-
         private ActionResult RedirectToLocal(string returnUrl)
         {
             if (Url.IsLocalUrl(returnUrl))
@@ -114,7 +76,5 @@ namespace MyProject.Web.Controllers
 
             return RedirectToAction("Index", "Home");
         }
-
-      
     }
 }
