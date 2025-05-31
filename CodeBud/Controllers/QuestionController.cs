@@ -37,25 +37,56 @@ namespace CodeBud.Controllers
 
         public ActionResult Create()
         {
+            var db = AccountController._db; // 👈 dispose etme, zaten global
+            
+                ViewBag.Tags = db.Tags.ToList();
+            
+
             return View(new Question());
         }
+
         [HttpPost]
         [ValidateInput(false)]
-        public ActionResult Create(Question model)
+        public ActionResult Create(Question model, string NewTag)
         {
-            
             model.UserId = _sessionService.GetCurrentUser().Id;
             model.CreatedAt = DateTime.Now;
 
-            using (AppDbContext db = AccountController._db)
+            var db = AccountController._db; // 👈 dispose etme, zaten global
+
+            if (!string.IsNullOrWhiteSpace(NewTag))
             {
-                db.Questions.Add(model);
-                db.SaveChanges();
+                var existingTag = db.Tags.FirstOrDefault(t => t.TagName.ToLower() == NewTag.ToLower());
+
+                if (existingTag != null)
+                {
+                    model.TagId = existingTag.TagId;
+                }
+                else
+                {
+                    var newTag = new Tag { TagName = NewTag };
+                    db.Tags.Add(newTag);
+                    db.SaveChanges();
+
+                    model.TagId = newTag.TagId;
+                }
             }
 
-            return RedirectToAction("Index");
+            db.Questions.Add(model);
 
+            db.SaveChanges();
+
+            db.QuestionTags.Add(new Models.Repository.Relations.QuestionTagMatch()
+            {
+                QuestionId = model.Id,
+                TagId = model.TagId
+            });
+
+            db.SaveChanges();
+
+            return RedirectToAction("Index", "User");
         }
+
 
         [HttpPost]
         [PermissionAuthorize("CanDeleteQuestion")]
@@ -72,6 +103,7 @@ namespace CodeBud.Controllers
 
             return RedirectToAction("Index");
         }
+
 
 
         public ActionResult Details(int id)
@@ -91,6 +123,8 @@ namespace CodeBud.Controllers
 
         }
         [HttpPost]
+        [ValidateInput(false)]
+
         public ActionResult AddComment(int questionId, string commentText)
         {
             if (string.IsNullOrWhiteSpace(commentText))
