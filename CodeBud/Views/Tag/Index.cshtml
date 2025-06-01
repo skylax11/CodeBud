@@ -1,0 +1,23 @@
+﻿@model List<CodeBud.Models.Entities.Tag>
+
+@{
+    ViewBag.Title = "Etiketler";
+}
+
+<h2 class="mb-4">📌 Tüm Etiketler</h2>
+
+<div class="row">
+    @foreach (var tag in Model)
+    {
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">@tag.TagName</h5>
+                    <a href="@Url.Action("ByTag", "Tag", new { id = tag.TagId })" class="btn btn-sm btn-outline-primary">
+                        Soruları Gör
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
