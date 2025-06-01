@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using CodeBud.SessionService;
 using CodeBud.ExternalLib; // ← Fotoğraf servisi burada
 using MyProject.Web.Controllers;
+using System.Threading.Tasks;
 
 namespace CodeBud.Controllers
 {
@@ -21,6 +22,20 @@ namespace CodeBud.Controllers
             ViewBag.Role = user?.Role;
             return View();
         }
+        [HttpPost]
+        public async Task<JsonResult> AskAI(string question)
+        {
+            if (string.IsNullOrWhiteSpace(question))
+            {
+                return Json(new { answer = "[Uyarı] Soru boş gönderildi." });
+            }
+
+            var llm = new LLMService();
+            var response = await llm.AskLLMAsync(question);
+            return Json(new { answer = response });
+        }
+
+
 
         public ActionResult ProfilePage()
         {
