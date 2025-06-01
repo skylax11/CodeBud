@@ -16,8 +16,9 @@ namespace CodeBud.DbContext
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Question> Questions { get; set; }
         public DbSet<Vote> Votes { get; set; }
+        public DbSet<Permission> Permissions { get; set; }         
+        public DbSet<UserPermission> UserPermissions { get; set; }
         public DbSet<Tag> Tags { get; set; }
-        public DbSet<QuestionTagMatch> QuestionTags { get; set; }
-
+        public DbSet<QuestionTagMatch> QuestionTags{ get; set; }
     }
 }

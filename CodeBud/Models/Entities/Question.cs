@@ -24,6 +24,7 @@ namespace CodeBud.Models.Entities
         public int UserId { get; set; }
         public UserModel User { get; set; }
         public virtual ICollection<Comment> Comments { get; set; }
+        public int TagId { get; set; }
 
         public int TagId { get; set; }
 
