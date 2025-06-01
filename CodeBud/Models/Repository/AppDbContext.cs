@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using CodeBud.Models.Entities;
+using CodeBud.Models.Repository.Relations;
 
 namespace CodeBud.DbContext
 {
@@ -15,6 +16,8 @@ namespace CodeBud.DbContext
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Question> Questions { get; set; }
         public DbSet<Vote> Votes { get; set; }
+        public DbSet<Tag> Tags { get; set; }
+        public DbSet<QuestionTagMatch> QuestionTags { get; set; }
 
     }
 }

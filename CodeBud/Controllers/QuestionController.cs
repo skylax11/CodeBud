@@ -23,11 +23,18 @@ namespace CodeBud.Controllers
             using (var db = new AppDbContext())
             {
                 var questions = db.Questions
+                                  .Include("User") 
                                   .OrderByDescending(q => q.CreatedAt)
                                   .ToPagedList(pageNumber, pageSize);
+
+                var currentUser = _sessionService.GetCurrentUser();
+                ViewBag.CurrentUserId = currentUser?.Id;
+                ViewBag.CurrentUserRole = currentUser?.Role;
+
                 return View(questions);
             }
         }
+
         public ActionResult Create()
         {
             var db = AccountController._db; // 👈 dispose etme, zaten global
@@ -81,6 +88,24 @@ namespace CodeBud.Controllers
         }
 
 
+        [HttpPost]
+        [PermissionAuthorize("CanDeleteQuestion")]
+        public ActionResult Delete(int id)
+        {
+            using (var db = new AppDbContext())
+            {
+                var question = db.Questions.FirstOrDefault(q => q.Id == id);
+                if (question == null) return HttpNotFound();
+
+                db.Questions.Remove(question);
+                db.SaveChanges();
+            }
+
+            return RedirectToAction("Index");
+        }
+
+
+
         public ActionResult Details(int id)
         {
             using(var db = new AppDbContext())
@@ -124,7 +149,5 @@ namespace CodeBud.Controllers
 
             return RedirectToAction("Details", new { id = questionId });
         }
-
-
     }
 }
