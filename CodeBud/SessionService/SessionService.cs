@@ -24,8 +24,9 @@ namespace CodeBud.SessionService
                 Username = user.Username,
                 Email = user.Email,
                 Role = user.Role,
-                name = user.name,
-                surName = user.surName
+                HashedPassword = user.HashedPassword,
+                ImageURL = user.ImageURL,
+                Password = user.Password,
             };
 
             var sessionData = JsonConvert.SerializeObject(safeUser);
