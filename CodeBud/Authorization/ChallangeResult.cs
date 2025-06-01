@@ -1,16 +1,10 @@
 ﻿using Microsoft.Owin.Security;
-using System;
 using System.Web;
 using System.Web.Mvc;
 
 public class ChallengeResult : HttpUnauthorizedResult
 {
-    public ChallengeResult(string provider, string redirectUri)
-        : this(provider, redirectUri, null)
-    {
-    }
-
-    public ChallengeResult(string provider, string redirectUri, string userId)
+    public ChallengeResult(string provider, string redirectUri, string userId = null)
     {
         LoginProvider = provider;
         RedirectUri = redirectUri;
