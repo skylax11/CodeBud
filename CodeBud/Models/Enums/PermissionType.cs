@@ -3,8 +3,10 @@
     public enum PermissionType
     {
         CanEditQuestion,
+        CanDeleteQuestion,
         CanDeleteUser,
         CanViewAdminPanel,
-        CanCreateComment
+        CanCreateComment,
+        CanDeleteComment,
     }
 }
