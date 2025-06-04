@@ -96,12 +96,16 @@
             </form>
         </div>
 
-        <!-- Profil Fotoğrafı (Sağ Üst) -->
-        <div class="ms-3">
-            <a href="@Url.Action("ProfilePage", "User")" title="Profil Sayfası">
+        <!-- Profil Fotoğrafı ve Log Out (Sağ Üst) -->
+        <div class="d-flex align-items-center ms-3">
+            <a href="@Url.Action("ProfilePage", "User")" title="Profil Sayfası" class="me-3">
                 <img src="@ViewBag.ProfileImageUrl" alt="Profil" class="rounded-circle shadow" width="48" height="48" style="object-fit: cover; border: 2px solid #ccc;" />
             </a>
+            <form action="@Url.Action("Logout", "User")" method="post">
+                <button type="submit" class="btn btn-outline-danger btn-sm">Çıkış Yap</button>
+            </form>
         </div>
+
     </div>
 
 
@@ -109,26 +113,27 @@
         <!-- Sidebar -->
         <div class="col-md-2 sidebar">
             <div class="text-center mb-4 fw-bold fs-4">💼 CodeBud</div>
-            <a href="#" class="active">🏠 Dashboard</a>
-            <a href="#">💳 Questions</a>
-            <a href="#">📂 Tags</a>
-            <a href="#">⚙️ Settings</a>
+            <a href="@Url.Action("Index", "User")" class="active">🏠 Dashboard</a>
+            <a href="@Url.Action("Index", "Question")">💳 Questions</a>
+            <a href="@Url.Action("Index", "Tag")">📂 Tags</a>
         </div>
 
         <!-- Main Content -->
         <div class="col-md-10 content">
             <div class="row mb-4">
                 <div class="col-md-12">
-                    <div class="card p-4">
+
+                    <!-- 🔹 My Questions -->
+                    <div class="card p-4 mb-4">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <span>📝 My Questions</span>
                             <a href="@Url.Action("Index", "Question")" class="btn btn-sm btn-outline-primary">Tüm Sorular</a>
                         </div>
 
-                        @if (Model != null && Model.Any())
+                        @if (ViewBag.MyQuestions != null && ((List<CodeBud.Models.Entities.Question>)ViewBag.MyQuestions).Any())
                         {
                             <ul class="list-group list-group-flush mt-3">
-                                @foreach (var q in Model)
+                                @foreach (var q in (List<CodeBud.Models.Entities.Question>)ViewBag.MyQuestions)
                                 {
                                     <li class="list-group-item d-flex justify-content-between align-items-center">
                                         <div>
@@ -147,10 +152,37 @@
                             <div class="text-muted mt-3">Henüz bir soru paylaşmadınız.</div>
                         }
                     </div>
+
+                    <!-- 🔹 Diğer Kullanıcıların Soruları -->
+                    <div class="card p-4">
+                        <div class="card-header fw-bold">🌐 Diğer Kullanıcıların Soruları</div>
+
+                        @if (ViewBag.OtherQuestions != null && ((List<CodeBud.Models.Entities.Question>)ViewBag.OtherQuestions).Any())
+                        {
+                            foreach (var q in (List<CodeBud.Models.Entities.Question>)ViewBag.OtherQuestions)
+                            {
+                                <div class="card mt-3 shadow-sm">
+                                    <div class="card-body">
+                                        <h5 class="card-title">@q.Title</h5>
+                                        <p class="card-text text-muted small">Soruldu: @q.CreatedAt.ToString("g")</p>
+                                        <p>
+                                            @Html.Raw(q.Description.Length > 150 ? q.Description.Substring(0, 150) + "..." : q.Description)
+                                        </p>
+                                        <a href="@Url.Action("Details", "Question", new { id = q.Id })" class="btn btn-sm btn-outline-primary">Detaylar</a>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-muted mt-3">Henüz başka kullanıcıdan soru bulunamadı.</div>
+                        }
+                    </div>
+
                 </div>
             </div>
-
         </div>
+
     </div>
 
 </body>
