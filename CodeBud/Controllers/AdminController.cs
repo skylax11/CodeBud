@@ -5,7 +5,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using CodeBud.SessionService;
-
+using CodeBud.Helpers;
 
 namespace CodeBud.Controllers
 {
@@ -16,7 +16,7 @@ namespace CodeBud.Controllers
 
         public ActionResult Index()
         {
-            var user = _sessionService.GetCurrentUser();
+            var user = JwtHelper.GetCurrentUserFromToken();
             ViewBag.Username = user?.Username;
             ViewBag.Role = user?.Role;
             return View();

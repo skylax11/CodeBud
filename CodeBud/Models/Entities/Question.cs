@@ -25,6 +25,7 @@ namespace CodeBud.Models.Entities
         public UserModel User { get; set; }
         public virtual ICollection<Comment> Comments { get; set; }
 
+        public int TagId { get; set; }
 
         // İLİŞKİLER İÇİN AYRICA CLASSLAR EKLENECEK.
     }

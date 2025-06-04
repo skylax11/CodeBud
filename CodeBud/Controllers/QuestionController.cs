@@ -8,6 +8,7 @@ using System.Web;
 using System.Web.Mvc;
 using CodeBud.SessionService;
 using PagedList;
+using CodeBud.Helpers;
 
 namespace CodeBud.Controllers
 {
@@ -23,11 +24,26 @@ namespace CodeBud.Controllers
             using (var db = new AppDbContext())
             {
                 var questions = db.Questions
+                                  .Include("User")
                                   .OrderByDescending(q => q.CreatedAt)
                                   .ToPagedList(pageNumber, pageSize);
+
+                var currentUser = JwtHelper.GetCurrentUserFromToken();
+
+                ViewBag.CurrentUserId = currentUser?.Id;
+                ViewBag.CurrentUserRole = currentUser?.Role;
+
+                // 🔥 Kullanıcının verdiği oyları da çek
+                var userVotes = db.Votes
+                                  .Where(v => v.UserId == currentUser.Id && v.QuestionId != null)
+                                  .ToList();
+                ViewBag.UserVotes = userVotes;
+
                 return View(questions);
             }
         }
+
+
         public ActionResult Create()
         {
             var db = AccountController._db; // 👈 dispose etme, zaten global
@@ -42,7 +58,7 @@ namespace CodeBud.Controllers
         [ValidateInput(false)]
         public ActionResult Create(Question model, string NewTag)
         {
-            model.UserId = _sessionService.GetCurrentUser().Id;
+            model.UserId = JwtHelper.GetCurrentUserFromToken().Id;
             model.CreatedAt = DateTime.Now;
 
             var db = AccountController._db; // 👈 dispose etme, zaten global
@@ -81,6 +97,24 @@ namespace CodeBud.Controllers
         }
 
 
+        [HttpPost]
+        [PermissionAuthorize("CanDeleteQuestion")]
+        public ActionResult Delete(int id)
+        {
+            using (var db = new AppDbContext())
+            {
+                var question = db.Questions.FirstOrDefault(q => q.Id == id);
+                if (question == null) return HttpNotFound();
+
+                db.Questions.Remove(question);
+                db.SaveChanges();
+            }
+
+            return RedirectToAction("Index");
+        }
+
+
+
         public ActionResult Details(int id)
         {
             using(var db = new AppDbContext())
@@ -115,7 +149,7 @@ namespace CodeBud.Controllers
                     Content = commentText,
                     CreatedAt = DateTime.Now,
                     QuestionId = questionId,
-                    UserId = _sessionService.GetCurrentUser().Id
+                    UserId = JwtHelper.GetCurrentUserFromToken().Id
                 };
 
                 db.Comments.Add(comment);
@@ -124,7 +158,5 @@ namespace CodeBud.Controllers
 
             return RedirectToAction("Details", new { id = questionId });
         }
-
-
     }
 }

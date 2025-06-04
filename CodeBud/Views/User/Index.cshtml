@@ -32,3 +32,103 @@
         </div>
     </div>
 </nav>
+
+<!-- 👇 Chat Button + Chat Box -->
+<style>
+    #chatToggleBtn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+        background-color: #0d6efd;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        font-size: 28px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+
+    #chatBox {
+        position: fixed;
+        bottom: 90px;
+        right: 20px;
+        width: 300px;
+        background-color: white;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        display: none;
+        z-index: 999;
+    }
+
+        #chatBox textarea {
+            width: 100%;
+            height: 60px;
+            resize: none;
+        }
+
+    #chatResponse {
+        font-size: 14px;
+        margin-top: 10px;
+        background-color: #f8f9fa;
+        padding: 8px;
+        border-radius: 5px;
+        white-space: pre-wrap;
+    }
+
+    #chatBox button {
+        width: 100%;
+        margin-top: 5px;
+    }
+</style>
+
+<!-- Chat Kutusu -->
+<button id="chatToggleBtn">💬</button>
+
+<div id="chatBox">
+    <textarea id="chatInput" placeholder="Sorunuzu yazın..."></textarea>
+    <button onclick="sendQuestion()">Gönder</button>
+    <div id="chatResponse"></div>
+</div>
+
+<script>
+    const toggleBtn = document.getElementById("chatToggleBtn");
+    const chatBox = document.getElementById("chatBox");
+
+    toggleBtn.addEventListener("click", () => {
+        chatBox.style.display = (chatBox.style.display === "none" || chatBox.style.display === "") ? "block" : "none";
+    });
+
+    async function sendQuestion() {
+        const input = document.getElementById("chatInput").value.trim();
+        const responseDiv = document.getElementById("chatResponse");
+
+        if (!input) {
+            responseDiv.innerText = "❗ Lütfen bir soru girin.";
+            return;
+        }
+
+        responseDiv.innerText = "⏳ Cevap bekleniyor...";
+
+        try {
+            const formData = new FormData();
+            formData.append("question", input);
+
+            const res = await fetch("/User/AskAI", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await res.json();
+            responseDiv.innerText = data.answer || "Cevap alınamadı.";
+
+        } catch (err) {
+            responseDiv.innerText = "⚠️ Sunucuya erişilemedi.";
+        }
+    }
+</script>
+
+
