@@ -3,25 +3,56 @@ using System;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using CodeBud.SessionService;
 using CodeBud.ExternalLib; // ← Fotoğraf servisi burada
 using MyProject.Web.Controllers;
 using System.Threading.Tasks;
+using CodeBud.DbContext;
+using CodeBud.Helpers; // JWT Helper burada
 
 namespace CodeBud.Controllers
 {
     [RoleAuthorize("User")]
     public class UserController : Controller
     {
-        private readonly SessionService.SessionService _sessionService = new SessionService.SessionService();
-
         public ActionResult Index()
         {
-            var user = _sessionService.GetCurrentUser();
+            var user = JwtHelper.GetCurrentUserFromToken();
             ViewBag.Username = user?.Username;
             ViewBag.Role = user?.Role;
+
+            string virtualPath = string.IsNullOrEmpty(user.ImageURL) ? "~/Photos/default.jpg" : user.ImageURL;
+            string physicalPath = Server.MapPath(virtualPath);
+
+            ViewBag.ProfileImageUrl = System.IO.File.Exists(physicalPath)
+                ? Url.Content(virtualPath)
+                : "https://via.placeholder.com/150";
+
+            using (var db = new AppDbContext())
+            {
+                var myQuestions = db.Questions
+                                    .Where(q => q.UserId == user.Id)
+                                    .OrderByDescending(q => q.CreatedAt)
+                                    .Take(4)
+                                    .ToList();
+
+                var otherQuestions = db.Questions
+                                       .Where(q => q.UserId != user.Id)
+                                       .OrderByDescending(q => q.CreatedAt)
+                                       .Take(4)
+                                       .ToList();
+
+                var userVotes = db.Votes
+                                  .Where(v => v.UserId == user.Id && v.QuestionId != null)
+                                  .ToList();
+
+                ViewBag.MyQuestions = myQuestions;
+                ViewBag.OtherQuestions = otherQuestions;
+                ViewBag.UserVotes = userVotes;
+            }
+
             return View();
         }
+
         [HttpPost]
         public async Task<JsonResult> AskAI(string question)
         {
@@ -35,15 +66,12 @@ namespace CodeBud.Controllers
             return Json(new { answer = response });
         }
 
-
-
         public ActionResult ProfilePage()
         {
-            var user = _sessionService.GetCurrentUser();
+            var user = JwtHelper.GetCurrentUserFromToken();
             ViewBag.Username = user?.Username;
             ViewBag.Role = user?.Role;
 
-            // Eğer kullanıcıda ImageURL varsa ve fiziksel dosya varsa onu göster
             string virtualPath = string.IsNullOrEmpty(user.ImageURL) ? "~/Photos/default.jpg" : user.ImageURL;
             string physicalPath = Server.MapPath(virtualPath);
 
@@ -57,25 +85,20 @@ namespace CodeBud.Controllers
         [HttpPost]
         public ActionResult UploadProfilePicture(HttpPostedFileBase profilePicture)
         {
-            var user = _sessionService.GetCurrentUser();
+            var user = JwtHelper.GetCurrentUserFromToken();
 
             try
             {
                 if (profilePicture != null && profilePicture.ContentLength > 0)
                 {
-                    // Servisle fotoğrafı yükle
                     var photoService = new PhotoUploadService(Server.MapPath("~"));
-                    string relativePath = photoService.UploadProfilePhoto(profilePicture, user.Username); // dosya adı: username.jpg
+                    string relativePath = photoService.UploadProfilePhoto(profilePicture, user.Username);
 
-                    // Veritabanına yolu kaydet
                     var dbUser = AccountController._db.Users.FirstOrDefault(x => x.Id == user.Id);
                     if (dbUser != null)
                     {
-                        dbUser.ImageURL = "~" + relativePath; // dikkat: "~" ekliyoruz çünkü Server.MapPath böyle çalışır
+                        dbUser.ImageURL = "~" + relativePath;
                         AccountController._db.SaveChanges();
-
-                        _sessionService.SetUserSession(dbUser);
-
                     }
                 }
             }
@@ -85,6 +108,12 @@ namespace CodeBud.Controllers
             }
 
             return RedirectToAction("ProfilePage");
+        }
+
+        public ActionResult Logout()
+        {
+            Response.Cookies["jwt"].Expires = DateTime.Now.AddDays(-1); // JWT'yi sil
+            return RedirectToAction("Login", "Account");
         }
     }
 }
