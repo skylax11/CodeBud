@@ -12,6 +12,8 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using System.Net.Http;
 
+using CodeBud.Helpers;
+
 namespace MyProject.Web.Controllers
 {
     public class AccountController : Controller
@@ -45,36 +47,39 @@ namespace MyProject.Web.Controllers
             else
                 return View(model);
         }
-        
+
         [HttpGet]
         public ActionResult Login()
         {
             return View();
         }
-        
+
         [HttpPost]
         public ActionResult Login(string username, string password)
         {
             var user = _db.Users.FirstOrDefault(u => u.Username == username);
             if (user != null && BCrypt.Net.BCrypt.Verify(password, user.HashedPassword))
             {
-                _sessionService.SetUserSession(user);
-        
+                // 🔐 Token üret
+                string token = JwtHelper.GenerateToken(user.Id, user.Username);
+
+                // 🍪 Cookie'ye kaydet (HttpOnly)
+                var cookie = new HttpCookie("jwt_token", token)
+                {
+                    HttpOnly = true,
+                    Expires = DateTime.UtcNow.AddDays(7)
+                };
+                Response.Cookies.Add(cookie);
+
+                // 🔁 Rolüne göre yönlendir
                 if (user.Role == "Admin")
                     return RedirectToAction("Index", "Admin");
                 else
                     return RedirectToAction("Index", "User");
             }
-        
+
             ViewBag.Error = "Kullanıcı adı veya şifre yanlış.";
             return View();
-        }
-        private ActionResult RedirectToLocal(string returnUrl)
-        {
-            if (Url.IsLocalUrl(returnUrl))
-                return Redirect(returnUrl);
-
-            return RedirectToAction("Index", "Home");
         }
     }
 }
