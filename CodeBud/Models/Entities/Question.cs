@@ -27,6 +27,7 @@ namespace CodeBud.Models.Entities
 
         public int TagId { get; set; }
 
-        // İLİŞKİLER İÇİN AYRICA CLASSLAR EKLENECEK.
+        public int VoteCount { get; set; }
+
     }
 }
