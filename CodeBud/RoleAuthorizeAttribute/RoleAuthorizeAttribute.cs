@@ -4,6 +4,7 @@ using System.Web;
 using System.Web.Mvc;
 using CodeBud.SessionService;
 using System.Web.Routing;
+using CodeBud.Helpers;
 
 namespace CodeBud.Web.Filters
 {
@@ -19,7 +20,7 @@ namespace CodeBud.Web.Filters
         public override void OnAuthorization(AuthorizationContext filterContext)
         {
             var sessionService = new SessionService.SessionService();
-            var user = sessionService.GetCurrentUser();
+            var user = JwtHelper.GetCurrentUserFromToken();
 
             if (user == null)
             {

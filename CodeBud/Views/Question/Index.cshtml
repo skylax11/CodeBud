@@ -1,6 +1,6 @@
 ﻿@using PagedList
+@using PagedList.Mvc
 @model IPagedList<CodeBud.Models.Entities.Question>
-@using PagedList.Mvc;
 
 @{
     ViewBag.Title = "Tüm Sorular";
@@ -16,34 +16,55 @@
 
     @foreach (var q in Model)
     {
+
         <div class="card mb-3 shadow-sm">
             <div class="card-body">
-                <h5 class="card-title">@Html.DisplayFor(m => q.Title)</h5>
+                <h5 class="card-title">@q.Title</h5>
+
                 <p class="card-text text-muted small">
                     Soruldu: @q.CreatedAt.ToString("g")
                 </p>
-                <p>@Html.Raw(q.Description.Substring(0, Math.Min(q.Description.Length, 200)) + "...")</p>
-                <a href="@Url.Action("Details", "Question", new { id = q.Id })" class="btn btn-sm btn-outline-primary">Detaylar</a>
 
-                @{
-                    var db = MyProject.Web.Controllers.AccountController._db;
-                    var tagIds = db.QuestionTags.Where(x=>x.QuestionId == q.Id).ToList().Select(y=>y.TagId).ToList();
-                    List<string> taglist = new List<string>();
-                    foreach(var tagid in tagIds)
-                    {
-                        taglist.Add(db.Tags.Where(x=>x.TagId == tagid).FirstOrDefault().TagName);
-                    }
-                } 
+                <p>
+                    @Html.Raw(q.Description.Length > 200 ? q.Description.Substring(0, 200) + "..." : q.Description)
+                </p>
 
-                @if (taglist.Count != 0)
-                {
-                    <div class="mt-3">
-                        @foreach (var tag in taglist)
-                        {
-                            <span class="badge bg-secondary me-1">@tag</span>
+                <div class="d-flex justify-content-between">
+                    <a href="@Url.Action("Details", "Question", new { id = q.Id })" class="btn btn-sm btn-outline-primary">Detaylar</a>
+
+                    <div>
+                        @{
+                            var userVotes = ViewBag.UserVotes as List<CodeBud.Models.Entities.Vote>
+                                ;
+                            var userVote = userVotes?.FirstOrDefault(v => v.QuestionId == q.Id);
+                            var votedType = userVote == null ? "none" : (userVote.IsUpvote ? "up" : "down");
                         }
+                        <button class="btn btn-sm btn-outline-success vote-btn me-1"
+                                data-id="@q.Id" data-up="true" data-voted="@votedType">
+                            ⬆
+                        </button>
+                        <span id="vote-count-@q.Id">@q.VoteCount</span>
+                        <button class="btn btn-sm btn-outline-danger vote-btn ms-1"
+                                data-id="@q.Id" data-up="false" data-voted="@votedType">
+                            ⬇
+                        </button>
+
                     </div>
-                }
+                    @if (ViewBag.CurrentUserId != null)
+                    {
+                        bool isOwner = (q.UserId == (int)ViewBag.CurrentUserId);
+                        bool isAdmin = (ViewBag.CurrentUserRole != null && ViewBag.CurrentUserRole.ToString() == "Admin");
+
+                        if (isOwner || isAdmin)
+                        {
+                            <form method="post" action="@Url.Action("Delete", "Question")" onsubmit="return confirm('Bu soruyu silmek istediğinizden emin misiniz?');" class="d-inline">
+                                <input type="hidden" name="id" value="@q.Id" />
+                                <button type="submit" class="btn btn-sm btn-danger ms-2">🗑 Sil</button>
+                            </form>
+                        }
+                    }
+                </div>
+
             </div>
         </div>
     }
@@ -63,3 +84,79 @@
             })
     </div>
 </div>
+<script>
+    // Sayfa yüklendiğinde butonları boyama
+    window.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.vote-btn').forEach(btn => {
+            const voteType = btn.dataset.voted;
+            const isUp = btn.dataset.up === "true";
+
+            if (voteType === "up" && isUp) {
+                btn.classList.remove("btn-outline-success");
+                btn.classList.add("btn-success");
+            } else if (voteType === "down" && !isUp) {
+                btn.classList.remove("btn-outline-danger");
+                btn.classList.add("btn-danger");
+            }
+        });
+    });
+
+    // Tıklama işlemi
+    document.querySelectorAll('.vote-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const questionId = btn.dataset.id;
+            const isUpvote = btn.dataset.up === "true";
+
+            const formData = new FormData();
+            formData.append("questionId", questionId);
+            formData.append("isUpvote", isUpvote);
+
+            const res = await fetch("/Vote/QuestionVote", {
+                method: "POST",
+                body: formData
+            });
+
+            const result = await res.json();
+            if (result.success) {
+                const countSpan = document.getElementById(`vote-count-${questionId}`);
+                countSpan.innerText = result.newCount;
+
+                const upBtn = document.querySelector(`.vote-btn[data-id="${questionId}"][data-up="true"]`);
+                const downBtn = document.querySelector(`.vote-btn[data-id="${questionId}"][data-up="false"]`);
+
+                // Tüm renkleri temizle
+                upBtn.classList.remove("btn-success", "btn-outline-success");
+                downBtn.classList.remove("btn-danger", "btn-outline-danger");
+
+                // Default outline'ı geri ekle
+                upBtn.classList.add("btn-outline-success");
+                downBtn.classList.add("btn-outline-danger");
+
+                // 🔥 Backend'den gelen oylama durumuna göre güncelle
+                const voteStatus = result.voteStatus;
+
+                if (voteStatus === "up") {
+                    upBtn.classList.remove("btn-outline-success");
+                    upBtn.classList.add("btn-success");
+                    upBtn.dataset.voted = "up";
+                    downBtn.dataset.voted = "none";
+                }
+                else if (voteStatus === "down") {
+                    downBtn.classList.remove("btn-outline-danger");
+                    downBtn.classList.add("btn-danger");
+                    downBtn.dataset.voted = "down";
+                    upBtn.dataset.voted = "none";
+                }
+                else if (voteStatus === "none") {
+                    // Oy kaldırıldıysa
+                    upBtn.dataset.voted = "none";
+                    downBtn.dataset.voted = "none";
+                }
+            } else {
+                alert(result.message || "İşlem başarısız.");
+            }
+        });
+    });
+</script>
+
+
