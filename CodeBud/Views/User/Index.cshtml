@@ -16,33 +16,6 @@
             background-color: #f4f7fc;
         }
 
-        .sidebar {
-            width: 220px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            background-color: #fff;
-            border-right: 1px solid #dee2e6;
-            padding-top: 60px; /* header yüksekliğine göre */
-            z-index: 1000;
-        }
-
-
-            .sidebar a {
-                display: block;
-                color: #333;
-                padding: 15px 20px;
-                text-decoration: none;
-                font-weight: 500;
-            }
-
-                .sidebar a:hover, .sidebar a.active {
-                    background-color: #e0eaff;
-                    border-left: 4px solid #0d6efd;
-                    color: #0d6efd;
-                }
-
         .content {
             margin-left: 230px;
             padding: 30px;
@@ -71,6 +44,7 @@
             top: 20px;
             right: 30px;
         }
+
         .rounded-icon {
             width: 50px;
             height: 50px;
@@ -86,37 +60,6 @@
 </head>
 <body>
 
-    <!-- 🔹 Header Bar: Search + Profile -->
-    <div class="d-flex justify-content-between align-items-center mb-4 px-3" style="padding-top: 20px;">
-        <!-- Search Bar (Ortalanmış) -->
-        <div class="flex-grow-1 d-flex justify-content-center">
-            <form class="d-flex" method="get" action="@Url.Action("Search", "Question")" style="width: 100%; max-width: 600px;">
-                <input class="form-control form-control-lg me-2" type="search" name="query" placeholder="Sorularda ara..." aria-label="Search" />
-                <button class="btn btn-primary btn-lg" type="submit">Ara</button>
-            </form>
-        </div>
-
-        <!-- Profil Fotoğrafı ve Log Out (Sağ Üst) -->
-        <div class="d-flex align-items-center ms-3">
-            <a href="@Url.Action("ProfilePage", "User")" title="Profil Sayfası" class="me-3">
-                <img src="@ViewBag.ProfileImageUrl" alt="Profil" class="rounded-circle shadow" width="48" height="48" style="object-fit: cover; border: 2px solid #ccc;" />
-            </a>
-            <form action="@Url.Action("Logout", "User")" method="post">
-                <button type="submit" class="btn btn-outline-danger btn-sm">Çıkış Yap</button>
-            </form>
-        </div>
-
-    </div>
-
-
-    <div class="row g-0">
-        <!-- Sidebar -->
-        <div class="col-md-2 sidebar">
-            <div class="text-center mb-4 fw-bold fs-4">💼 CodeBud</div>
-            <a href="@Url.Action("Index", "User")" class="active">🏠 Dashboard</a>
-            <a href="@Url.Action("Index", "Question")">💳 Questions</a>
-            <a href="@Url.Action("Index", "Tag")">📂 Tags</a>
-        </div>
 
         <!-- Main Content -->
         <div class="col-md-10 content">
@@ -182,8 +125,6 @@
                 </div>
             </div>
         </div>
-
-    </div>
 
 </body>
 </html>
@@ -286,3 +227,15 @@
 </script>
 
 
+<script>
+    const sidebar = document.getElementById("sidebar");
+    const sidebarToggleBtn = document.getElementById("sidebarToggleBtn");
+
+    sidebarToggleBtn.addEventListener("click", () => {
+        if (sidebar.style.display === "none") {
+            sidebar.style.display = "block";
+        } else {
+            sidebar.style.display = "none";
+        }
+    });
+</script>

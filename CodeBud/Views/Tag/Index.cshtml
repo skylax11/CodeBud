@@ -2,22 +2,49 @@
 
 @{
     ViewBag.Title = "Etiketler";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2 class="mb-4">📌 Tüm Etiketler</h2>
+<div class="container mt-5">
+    <h2 class="mb-4 fw-bold"><i class="bi bi-tags-fill"></i> Etiketler</h2>
 
-<div class="row">
-    @foreach (var tag in Model)
-    {
-        <div class="col-md-3 mb-3">
-            <div class="card shadow-sm h-100">
-                <div class="card-body text-center">
-                    <h5 class="card-title">@tag.TagName</h5>
-                    <a href="@Url.Action("ByTag", "Tag", new { id = tag.TagId })" class="btn btn-sm btn-outline-primary">
-                        Soruları Gör
-                    </a>
+    <div class="row">
+        @foreach (var tag in Model)
+        {
+            <div class="col-md-3 col-sm-6 mb-4">
+                <div class="tag-card card border-0 shadow-sm h-100 text-center p-3">
+                    <div class="card-body d-flex flex-column justify-content-between">
+                        <h5 class="card-title fw-semibold text-primary">#@tag.TagName</h5>
+                        <a href="@Url.Action("ByTag", "Tag", new { id = tag.TagId })" class="btn btn-sm btn-outline-primary mt-3">
+                            Soruları Gör
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
-    }
+        }
+    </div>
 </div>
+
+<style>
+    .tag-card {
+        background: linear-gradient(to top left, #f8f9fa, #ffffff);
+        border-radius: 12px;
+        transition: all 0.3s ease-in-out;
+    }
+
+        .tag-card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+            background: linear-gradient(to top right, #e9f5ff, #ffffff);
+        }
+
+        .tag-card .card-title {
+            font-size: 1.2rem;
+            color: #0d6efd;
+        }
+
+        .tag-card .btn-outline-primary {
+            border-radius: 20px;
+            font-weight: 500;
+        }
+</style>
