@@ -3,32 +3,239 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm sticky-top">
-    <div class="container-fluid">
-        <a class="navbar-brand fw-bold" href="@Url.Action("Index", "Home")">CodeBud</a>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard | CodeBud</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f4f7fc;
+        }
 
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+        .content {
+            margin-left: 230px;
+            padding: 30px;
+        }
 
-        <div class="collapse navbar-collapse" id="navbarContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link" href="@Url.Action("Index", "Question")">Questions</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="@Url.Action("Index", "Tag")">Tags</a>
-                </li>
-            </ul>
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.05);
+        }
 
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link" href="@Url.Action("ProfilePage", "User")">Profil</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-danger" href="@Url.Action("Logout", "User")">Çıkış Yap</a>
-                </li>
-            </ul>
+        .card-header {
+            background-color: transparent;
+            border-bottom: none;
+            font-weight: bold;
+        }
+
+        .chart-placeholder {
+            height: 200px;
+            background: linear-gradient(135deg, #cbe2ff, #dbefff);
+            border-radius: 10px;
+        }
+
+        .fixed-profile {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+        }
+
+        .rounded-icon {
+            width: 50px;
+            height: 50px;
+            background-color: #e8f0ff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0d6efd;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+
+
+        <!-- Main Content -->
+        <div class="col-md-10 content">
+            <div class="row mb-4">
+                <div class="col-md-12">
+
+                    <!-- 🔹 My Questions -->
+                    <div class="card p-4 mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span>📝 My Questions</span>
+                            <a href="@Url.Action("Index", "Question")" class="btn btn-sm btn-outline-primary">Tüm Sorular</a>
+                        </div>
+
+                        @if (ViewBag.MyQuestions != null && ((List<CodeBud.Models.Entities.Question>)ViewBag.MyQuestions).Any())
+                        {
+                            <ul class="list-group list-group-flush mt-3">
+                                @foreach (var q in (List<CodeBud.Models.Entities.Question>)ViewBag.MyQuestions)
+                                {
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>@q.Title</strong><br />
+                                            <small class="text-muted">@q.CreatedAt.ToShortDateString()</small>
+                                        </div>
+                                        <a class="btn btn-sm btn-primary" href="@Url.Action("Details", "Question", new { id = q.Id })">
+                                            Görüntüle
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <div class="text-muted mt-3">Henüz bir soru paylaşmadınız.</div>
+                        }
+                    </div>
+
+                    <!-- 🔹 Diğer Kullanıcıların Soruları -->
+                    <div class="card p-4">
+                        <div class="card-header fw-bold">🌐 Diğer Kullanıcıların Soruları</div>
+
+                        @if (ViewBag.OtherQuestions != null && ((List<CodeBud.Models.Entities.Question>)ViewBag.OtherQuestions).Any())
+                        {
+                            foreach (var q in (List<CodeBud.Models.Entities.Question>)ViewBag.OtherQuestions)
+                            {
+                                <div class="card mt-3 shadow-sm">
+                                    <div class="card-body">
+                                        <h5 class="card-title">@q.Title</h5>
+                                        <p class="card-text text-muted small">Soruldu: @q.CreatedAt.ToString("g")</p>
+                                        <p>
+                                            @Html.Raw(q.Description.Length > 150 ? q.Description.Substring(0, 150) + "..." : q.Description)
+                                        </p>
+                                        <a href="@Url.Action("Details", "Question", new { id = q.Id })" class="btn btn-sm btn-outline-primary">Detaylar</a>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-muted mt-3">Henüz başka kullanıcıdan soru bulunamadı.</div>
+                        }
+                    </div>
+
+                </div>
+            </div>
         </div>
-    </div>
-</nav>
+
+</body>
+</html>
+
+<style>
+    #chatToggleBtn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+        background-color: #0d6efd;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        font-size: 28px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+
+    #chatBox {
+        position: fixed;
+        bottom: 90px;
+        right: 20px;
+        width: 300px;
+        background-color: white;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        display: none;
+        z-index: 999;
+    }
+
+        #chatBox textarea {
+            width: 100%;
+            height: 60px;
+            resize: none;
+        }
+
+    #chatResponse {
+        font-size: 14px;
+        margin-top: 10px;
+        background-color: #f8f9fa;
+        padding: 8px;
+        border-radius: 5px;
+        white-space: pre-wrap;
+    }
+
+    #chatBox button {
+        width: 100%;
+        margin-top: 5px;
+    }
+</style>
+
+<!-- Chat Kutusu -->
+<button id="chatToggleBtn">💬</button>
+
+<div id="chatBox">
+    <textarea id="chatInput" placeholder="Sorunuzu yazın..."></textarea>
+    <button onclick="sendQuestion()">Gönder</button>
+    <div id="chatResponse"></div>
+</div>
+
+<script>
+    const toggleBtn = document.getElementById("chatToggleBtn");
+    const chatBox = document.getElementById("chatBox");
+
+    toggleBtn.addEventListener("click", () => {
+        chatBox.style.display = (chatBox.style.display === "none" || chatBox.style.display === "") ? "block" : "none";
+    });
+
+    async function sendQuestion() {
+        const input = document.getElementById("chatInput").value.trim();
+        const responseDiv = document.getElementById("chatResponse");
+
+        if (!input) {
+            responseDiv.innerText = "❗ Lütfen bir soru girin.";
+            return;
+        }
+
+        responseDiv.innerText = "⏳ Cevap bekleniyor...";
+
+        try {
+            const formData = new FormData();
+            formData.append("question", input);
+
+            const res = await fetch("/User/AskAI", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await res.json();
+            responseDiv.innerText = data.answer || "Cevap alınamadı.";
+
+        } catch (err) {
+            responseDiv.innerText = "⚠️ Sunucuya erişilemedi.";
+        }
+    }
+</script>
+
+
+<script>
+    const sidebar = document.getElementById("sidebar");
+    const sidebarToggleBtn = document.getElementById("sidebarToggleBtn");
+
+    sidebarToggleBtn.addEventListener("click", () => {
+        if (sidebar.style.display === "none") {
+            sidebar.style.display = "block";
+        } else {
+            sidebar.style.display = "none";
+        }
+    });
+</script>

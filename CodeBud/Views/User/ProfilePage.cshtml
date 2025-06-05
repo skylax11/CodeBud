@@ -3,28 +3,98 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container mt-5">
-    <div class="card mx-auto" style="max-width: 500px;">
-        <div class="card-body text-center">
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Profil Sayfası | CodeBud</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 
-            <!-- Profil resmi -->
-            <img src="@Url.Content(ViewBag.ProfileImageUrl)" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;" alt="Profil Resmi" />
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(to bottom right, #f1f4ff, #d9e6ff);
+            min-height: 100vh;
+        }
 
-            <!-- Kullanıcı bilgileri -->
-            <h4 class="card-title">@ViewBag.FullName</h4>
-            <p class="card-text text-muted">@ViewBag.Username</p>
-            <p class="card-text"><strong>Rol:</strong> @ViewBag.Role</p>
+        .profile-card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            background-color: #ffffff;
+            padding: 40px 30px;
+        }
 
-            <!-- PROFİL FOTOĞRAF YÜKLEME FORMU (Html.BeginForm ile) -->
-            @using (Html.BeginForm("UploadProfilePicture", "User", FormMethod.Post, new { enctype = "multipart/form-data" }))
-            {
-                <div class="form-group">
-                    <input type="file" name="profilePicture" accept="image/*" class="form-control" required />
-                </div>
-                <button type="submit" class="btn btn-success mt-2">Fotoğrafı Güncelle</button>
+        .profile-img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 4px solid #e0e0e0;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .profile-info h4 {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .profile-info p {
+            margin-bottom: 5px;
+            color: #777;
+        }
+
+        .btn-custom {
+            border-radius: 8px;
+            padding: 8px 20px;
+            transition: all 0.2s ease;
+        }
+
+            .btn-custom:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
             }
 
-            <a href="@Url.Action(" Index", "User" )" class="btn btn-primary mt-4">Ana Menüye Dön</a>
+        .form-control {
+            border-radius: 10px;
+        }
+
+        .file-upload-label {
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container d-flex justify-content-center align-items-center" style="min-height: 90vh;">
+        <div class="profile-card text-center">
+            <!-- Profil resmi -->
+            <img src="@Url.Content(ViewBag.ProfileImageUrl)" class="profile-img" alt="Profil Resmi" />
+
+            <!-- Kullanıcı bilgileri -->
+            <div class="profile-info">
+                <h4>@ViewBag.FullName</h4>
+                <p>@ViewBag.Username</p>
+                <p><strong>Rol:</strong> @ViewBag.Role</p>
+            </div>
+
+            <!-- PROFİL FOTOĞRAF YÜKLEME FORMU -->
+            @using (Html.BeginForm("UploadProfilePicture", "User", FormMethod.Post, new { enctype = "multipart/form-data" }))
+            {
+                <div class="form-group mt-3">
+                    <label class="file-upload-label">Profil Fotoğrafı Yükle</label>
+                    <input type="file" name="profilePicture" accept="image/*" class="form-control" required />
+                </div>
+                <button type="submit" class="btn btn-success mt-3 btn-custom">Fotoğrafı Güncelle</button>
+            }
+
+            <a href="@Url.Action("Index", "User")" class="btn btn-primary mt-4 btn-custom">Ana Menüye Dön</a>
         </div>
     </div>
-</div>
+
+</body>
+</html>

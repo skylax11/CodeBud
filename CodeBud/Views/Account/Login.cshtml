@@ -12,6 +12,7 @@
 
         @using (Html.BeginForm("Login", "Account", FormMethod.Post))
         {
+            @Html.AntiForgeryToken()
             <div class="mb-3">
                 <label class="form-label">Kullanıcı Adı</label>
                 <input type="text" name="username" class="form-control" placeholder="kullaniciadi123" required />
@@ -25,21 +26,15 @@
             if (!string.IsNullOrEmpty(ViewBag.Error as string))
             {
                 <div class="alert alert-danger text-center" role="alert">
-                    @ViewBag.Error
+                    @Html.Encode(ViewBag.Error)
                 </div>
             }
-
             <div class="d-grid">
                 <button type="submit" class="btn btn-primary">Giriş Yap</button>
             </div>
         }
 
         <hr class="my-4" />
-
-        <a href="@Url.Action("ExternalLogin", "Account", new { provider = "Google", returnUrl = "/" })"
-           class="btn btn-danger w-100">
-            <i class="bi bi-google me-2"></i> Google ile Giriş Yap
-        </a>
 
         <div class="text-center">
             <p class="mb-2">Hesabınız yok mu?</p>

@@ -5,41 +5,94 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container mt-4">
-    <h2>Yeni Soru Ekle</h2>
+@section Styles {
+    <style>
+        .custom-form-container {
+            max-width: 800px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        h2 {
+            font-weight: 700;
+            color: #343a40;
+            margin-bottom: 30px;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+
+        .form-control {
+            border-radius: 8px;
+        }
+
+        .form-text {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+
+        .btn-success {
+            width: 100%;
+            font-weight: 600;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .btn-outline-secondary {
+            margin-top: 10px;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+    </style>
+}
+
+<div class="custom-form-container">
+    <h2>📝 Yeni Soru Ekle</h2>
 
     @using (Html.BeginForm("Create", "Question", FormMethod.Post))
-    {
-        <div class="form-group">
-            @Html.LabelFor(m => m.Title)
-            @if (Session["CurrentUser"] != null)
+    {@Html.AntiForgeryToken()
+    <div class="form-group">
+        @Html.LabelFor(m => m.Title)
+        @Html.TextBoxFor(m => m.Title, new { @class = "form-control", placeholder = "Başlık giriniz" })
+    </div>
+
+    <div class="form-group mt-3">
+        @Html.Label("Etiket Seç veya Yeni Ekle")
+        @Html.DropDownListFor(m => m.TagId,
+            new SelectList(ViewBag.Tags, "TagId", "TagName"),
+            "-- Var olan etiketi seçin --",
+            new { @class = "form-control", id = "tagDropdown" })
+
+        <small class="text-muted d-block mt-2">veya yeni bir etiket ekle:</small>
+        @Html.TextBox("NewTag", null, new { @class = "form-control", placeholder = "Yeni etiket girin", id = "newTagInput" })
+    </div>
+
+    <div class="form-group mt-3">
+        @Html.LabelFor(m => m.Description)
+        <div class="position-relative">
+            @Html.TextAreaFor(m => m.Description, new
             {
-                @Html.TextBoxFor(m => m.Title, new { @class = "form-control", placeholder = "Başlık giriniz" })
-            }
+                @class = "form-control",
+                @id = "questionBody",
+                placeholder = "Sorununuzu detaylıca yazın. Kod olan kısmı seçip aşağıdaki butona basın.",
+                rows = 10
+            })
+            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="wrapSelectedWithCode()">💡 Seçilen Kodu Biçimlendir</button>
         </div>
+        <small class="form-text">
+            Kod bloğu için <code>&lt;pre&gt;&lt;code&gt;...&lt;/code&gt;&lt;/pre&gt;</code> otomatik eklenir.
+        </small>
+    </div>
 
-        <div class="form-group mt-3">
-            @Html.LabelFor(m => m.Description)
-            <div class="position-relative">
-                @Html.TextAreaFor(m => m.Description, new
-                {
-                    @class = "form-control w-100", // 👈 Bootstrap genişlik sınıfı
-                    @id = "questionBody",
-                    placeholder = "Sorununuzu detaylıca yazın. Kod olan kısmı seçip aşağıdaki butona basın.",
-                    rows = 12,
-                    style = "max-width: 100%;" // 👈 Ekstra garanti için
-                })
-
-
-                <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="wrapSelectedWithCode()">💡 Seçilen Kodu Biçimlendir</button>
-            </div>
-            <small class="form-text text-muted">
-                Kod bloğu için <code>&lt;pre&gt;&lt;code&gt;...&lt;/code&gt;&lt;/pre&gt;</code> otomatik eklenir.
-            </small>
-        </div>
-
-        <button type="submit" class="btn btn-success mt-4">Soruyu Gönder</button>
-    }
+    <button type="submit" class="btn btn-success mt-4">✅ Soruyu Gönder</button>
+}
 </div>
 
 <script>
@@ -60,7 +113,6 @@
         const wrapped = "<pre><code>" + selectedText + "</code></pre>";
         textarea.value = before + wrapped + after;
 
-        // Seçimi yeni hale getir
         textarea.selectionStart = start;
         textarea.selectionEnd = start + wrapped.length;
         textarea.focus();

@@ -1,0 +1,62 @@
+﻿@model List<CodeBud.Models.Entities.Question>
+
+@{
+    ViewBag.Title = ViewBag.TagName + " Soruları";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4 fw-bold"><i class="bi bi-hash"></i> @ViewBag.TagName ile Etiketlenen Sorular</h2>
+
+    @if (Model.Any())
+    {
+        foreach (var q in Model)
+        {
+            <div class="card question-card mb-4 shadow-sm border-0">
+                <div class="card-body">
+                    <h5 class="card-title fw-semibold text-primary">
+                        <i class="bi bi-question-circle-fill me-1"></i> @q.Title
+                    </h5>
+                    <p class="card-text text-muted" style="white-space: pre-wrap;">
+                        @Html.Raw(q.Description.Length > 200 ? q.Description.Substring(0, 200) + "..." : q.Description)
+                    </p>
+                    <a href="@Url.Action("Details", "Question", new { id = q.Id })" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                        🔍 Detaylar
+                    </a>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="alert alert-info">Bu etikete ait henüz bir soru yok.</div>
+    }
+</div>
+
+<style>
+    .question-card {
+        background: linear-gradient(to top left, #ffffff, #f4f7fc);
+        border-radius: 12px;
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s;
+    }
+
+        .question-card:hover {
+            transform: scale(1.01);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .question-card .card-title {
+            font-size: 1.2rem;
+        }
+
+        .question-card .btn-outline-primary {
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+            .question-card .btn-outline-primary:hover {
+                background-color: #0d6efd;
+                color: #fff;
+                border-color: #0d6efd;
+            }
+</style>
