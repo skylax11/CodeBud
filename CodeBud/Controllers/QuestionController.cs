@@ -14,8 +14,6 @@ namespace CodeBud.Controllers
 {
     public class QuestionController : Controller
     {
-        private readonly SessionService.SessionService _sessionService = new SessionService.SessionService();
-
         public ActionResult Index(int? page)
         {
             int pageSize = 5;
@@ -46,6 +44,8 @@ namespace CodeBud.Controllers
 
         public ActionResult Create()
         {
+            ViewBag.User = GetUser();
+
             var db = AccountController._db; // 👈 dispose etme, zaten global
             
                 ViewBag.Tags = db.Tags.ToList();
@@ -104,9 +104,27 @@ namespace CodeBud.Controllers
             using (var db = new AppDbContext())
             {
                 var question = db.Questions.FirstOrDefault(q => q.Id == id);
-                if (question == null) return HttpNotFound();
+                if (question == null)
+                    return HttpNotFound();
 
+                // 🔹 1. Bu soruya yapılan yorumları sil
+                var commentList = db.Comments.Where(c => c.QuestionId == question.Id).ToList();
+                foreach (var comment in commentList)
+                {
+                    db.Comments.Remove(comment);
+                }
+
+                // 🔹 2. Bu soruya verilen vote'ları sil
+                var voteList = db.Votes.Where(v => v.QuestionId == question.Id).ToList();
+                foreach (var vote in voteList)
+                {
+                    db.Votes.Remove(vote);
+                    db.QuestionVote.Remove(db.QuestionVote.Where(x => x.VoteId == vote.Id).FirstOrDefault());
+                }
+
+                // 🔹 3. Sorunun kendisini sil
                 db.Questions.Remove(question);
+
                 db.SaveChanges();
             }
 
@@ -117,7 +135,10 @@ namespace CodeBud.Controllers
 
         public ActionResult Details(int id)
         {
-            using(var db = new AppDbContext())
+            var currentUser = JwtHelper.GetCurrentUserFromToken();
+            ViewBag.User = currentUser;
+
+            using (var db = new AppDbContext())
             {
                 var question = db.Questions
                                  .Include("User")             // Soran kullanıcıyı dahil et
@@ -158,5 +179,21 @@ namespace CodeBud.Controllers
 
             return RedirectToAction("Details", new { id = questionId });
         }
+        public UserModel GetUser()
+        {
+            var user = JwtHelper.GetCurrentUserFromToken();
+            ViewBag.Username = user?.Username;
+            ViewBag.Role = user?.Role;
+
+            string virtualPath = string.IsNullOrEmpty(user.ImageURL) ? "~/Photos/default.jpg" : user.ImageURL;
+            string physicalPath = Server.MapPath(virtualPath);
+
+            ViewBag.ProfileImageUrl = System.IO.File.Exists(physicalPath)
+                ? Url.Content(virtualPath)
+                : "https://via.placeholder.com/150";
+
+            return user;
+        }
+
     }
 }
