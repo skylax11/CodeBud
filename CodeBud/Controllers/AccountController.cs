@@ -35,9 +35,11 @@ namespace MyProject.Web.Controllers
             if (existingUser != null)
             {
                 ViewBag.Error = "Bu kullanıcı adı zaten alınmış.";
-                return View();
+                return View(new UserModel());
             }
 
+            model.ImageURL = "~/Photos/default.jpg";
+            model.Role = "User";
             model.HashedPassword = BCrypt.Net.BCrypt.HashPassword(model.Password);
             _db.Users.Add(model);
             int turned = _db.SaveChanges();
