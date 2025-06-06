@@ -6,19 +6,18 @@
 <div class="container-fluid min-vh-100 d-flex justify-content-center align-items-center bg-light">
     <div class="card shadow p-4" style="width: 100%; max-width: 400px;">
         <div class="text-center mb-4">
-            <h2 class="fw-bold text-primary">Giriş Yap</h2>
-            <p class="text-muted">Lütfen hesabınızla giriş yapın</p>
+            <h2 class="fw-bold text-primary">Log In</h2>
         </div>
 
         @using (Html.BeginForm("Login", "Account", FormMethod.Post))
         {
             <div class="mb-3">
-                <label class="form-label">Kullanıcı Adı</label>
-                <input type="text" name="username" class="form-control" placeholder="kullaniciadi123" required />
+                <label class="form-label">Username</label>
+                <input type="text" name="username" class="form-control" placeholder="username" required />
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Şifre</label>
+                <label class="form-label">Password</label>
                 <input type="password" name="password" class="form-control" placeholder="••••••••" required />
             </div>
 
@@ -30,20 +29,15 @@
             }
 
             <div class="d-grid">
-                <button type="submit" class="btn btn-primary">Giriş Yap</button>
+                <button type="submit" class="btn btn-primary">Log In</button>
             </div>
         }
 
         <hr class="my-4" />
 
-        <a href="@Url.Action("ExternalLogin", "Account", new { provider = "Google", returnUrl = "/" })"
-           class="btn btn-danger w-100">
-            <i class="bi bi-google me-2"></i> Google ile Giriş Yap
-        </a>
-
         <div class="text-center">
-            <p class="mb-2">Hesabınız yok mu?</p>
-            <a href="@Url.Action("Register", "Account")" class="btn btn-outline-secondary w-100">Kayıt Ol</a>
+            <p class="mb-2">Don't you have an account?</p>
+            <a href="@Url.Action("Register", "Account")" class="btn btn-outline-secondary w-100">Register</a>
         </div>
     </div>
 </div>

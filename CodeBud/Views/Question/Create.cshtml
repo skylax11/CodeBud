@@ -1,57 +1,164 @@
 ﻿@model CodeBud.Models.Entities.Question
-
 @{
     ViewBag.Title = "Yeni Soru Ekle";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container mt-4">
-    <h2>Yeni Soru Ekle</h2>
+<!-- 🔹 Stil -->
+<style>
+    body {
+        background-color: #f4f7fc;
+        font-family: 'Segoe UI', sans-serif;
+    }
 
-    @using (Html.BeginForm("Create", "Question", FormMethod.Post))
-    {
-        <div class="form-group">
-            @Html.LabelFor(m => m.Title)
-            @if (Session["CurrentUser"] != null)
-            {
-                @Html.TextBoxFor(m => m.Title, new { @class = "form-control", placeholder = "Başlık giriniz" })
+    .sidebar {
+        width: 220px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        background-color: #fff;
+        border-right: 1px solid #dee2e6;
+        padding-top: 60px;
+        z-index: 1000;
+    }
+
+        .sidebar a {
+            display: block;
+            color: #333;
+            padding: 15px 20px;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+            .sidebar a:hover,
+            .sidebar a.active {
+                background-color: #e0eaff;
+                border-left: 4px solid #0d6efd;
+                color: #0d6efd;
             }
-        </div>
 
-        <div class="form-group mt-3">
-            @Html.Label("Etiket Seç veya Yeni Ekle")
-            @Html.DropDownListFor(m => m.TagId,
-                new SelectList(ViewBag.Tags, "TagId", "TagName"),
-                "-- Var olan etiketi seçin --",
-                new { @class = "form-control", id = "tagDropdown" })
+    .container-main {
+        margin-left: 240px;
+        padding: 30px;
+        max-width: 900px;
+    }
 
-            <small class="text-muted d-block mt-2">veya yeni bir etiket ekle:</small>
-            @Html.TextBox("NewTag", null, new { @class = "form-control", placeholder = "Yeni etiket girin", id = "newTagInput" })
-        </div>
+    .custom-form-container {
+        background-color: #ffffff;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    }
 
+    h2 {
+        font-weight: 700;
+        color: #343a40;
+        margin-bottom: 30px;
+    }
 
-        <div class="form-group mt-3">
-            @Html.LabelFor(m => m.Description)
-            <div class="position-relative">
-                @Html.TextAreaFor(m => m.Description, new
-                {
-                    @class = "form-control w-100",
-                    @id = "questionBody",
-                    placeholder = "Sorununuzu detaylıca yazın. Kod olan kısmı seçip aşağıdaki butona basın.",
-                    rows = 12,
-                    style = "max-width: 100%;"
-                })
-                <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="wrapSelectedWithCode()">💡 Seçilen Kodu Biçimlendir</button>
-            </div>
-            <small class="form-text text-muted">
-                Kod bloğu için <code>&lt;pre&gt;&lt;code&gt;...&lt;/code&gt;&lt;/pre&gt;</code> otomatik eklenir.
-            </small>
-        </div>
+    .form-group label {
+        font-weight: 500;
+        margin-bottom: 6px;
+    }
 
-        <button type="submit" class="btn btn-success mt-4">Soruyu Gönder</button>
+    .form-control {
+        border-radius: 8px;
+    }
+
+    .form-text {
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+
+    .btn-success {
+        width: 100%;
+        font-weight: 600;
+        padding: 12px;
+        border-radius: 8px;
+    }
+
+    .btn-outline-secondary {
+        margin-top: 10px;
+    }
+
+    textarea {
+        resize: vertical;
+    }
+</style>
+
+<!-- 🔹 Header ve Sidebar (ViewBag.Role ile) -->
+<div class="d-flex justify-content-end align-items-center mb-4 px-3" style="padding-top: 20px;">
+
+    <div class="d-flex align-items-center ms-3">
+        <a href="@Url.Action("ProfilePage", "User")" class="me-3">
+            <img src="@ViewBag.ProfileImageUrl" class="rounded-circle shadow" width="48" height="48" style="object-fit: cover; border: 2px solid #ccc;" />
+        </a>
+        <form action="@Url.Action("Logout", "User")" method="post">
+            <button type="submit" class="btn btn-outline-danger btn-sm">Log Out</button>
+        </form>
+    </div>
+</div>
+
+<div id="sidebar" class="col-md-2 sidebar">
+
+    <div class="text-center mb-4 fw-bold fs-4">💼 CodeBud</div>
+    <a href="@Url.Action("Index", "User")">🏠 Dashboard</a>
+    <a href="@Url.Action("Index", "Question")" class="active">💳 Questions</a>
+    <a href="@Url.Action("Index", "Tag")">📂 Tags</a>
+    @if (ViewBag.Role == "Admin")
+    {
+        <a href="@Url.Action("Index", "Admin")">🛠 Admin Panel</a>
+
     }
 </div>
 
+<!-- 🔘 Ana Form -->
+<div class="container-main">
+    <div class="custom-form-container">
+        <h2>📝 Ask a New Question</h2>
+
+        @using (Html.BeginForm("Create", "Question", FormMethod.Post))
+        {
+            <div class="form-group">
+                @Html.LabelFor(m => m.Title)
+                @Html.TextBoxFor(m => m.Title, new { @class = "form-control", placeholder = "Type a title." })
+            </div>
+
+            <div class="form-group mt-3">
+                @Html.Label("Choose tag or add new one")
+                @Html.DropDownListFor(m => m.TagId,
+                    new SelectList(ViewBag.Tags, "TagId", "TagName"),
+                    "-- Choose an existing one --",
+                    new { @class = "form-control", id = "tagDropdown" })
+
+                <small class="text-muted d-block mt-2">or add a new one:</small>
+                @Html.TextBox("NewTag", null, new { @class = "form-control", placeholder = "Type a new tag", id = "newTagInput" })
+            </div>
+
+            <div class="form-group mt-3">
+                @Html.LabelFor(m => m.Description)
+                <div class="position-relative">
+                    @Html.TextAreaFor(m => m.Description, new
+                    {
+                        @class = "form-control",
+                        @id = "questionBody",
+                        placeholder = "Type your question with details. Select the code part and press the code format button.",
+                        rows = 10
+                    })
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="wrapSelectedWithCode()">💡 Code Format</button>
+                </div>
+                <small class="form-text">
+                    <code>&lt;pre&gt;&lt;code&gt;...&lt;/code&gt;&lt;/pre&gt;</code>
+                </small>
+            </div>
+
+            <button type="submit" class="btn btn-success mt-4">✅ Ask</button>
+        }
+    </div>
+</div>
+
+<!-- 🔻 Kod Format Script -->
 <script>
     function wrapSelectedWithCode() {
         const textarea = document.getElementById("questionBody");
@@ -59,7 +166,7 @@
         const end = textarea.selectionEnd;
 
         if (start === end) {
-            alert("Kod olarak biçimlendirmek için önce bir metin seçin.");
+            alert("Please select a text first.");
             return;
         }
 

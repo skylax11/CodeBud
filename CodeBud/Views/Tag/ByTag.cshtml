@@ -1,25 +1,125 @@
 ﻿@model List<CodeBud.Models.Entities.Question>
-
 @{
     ViewBag.Title = ViewBag.TagName + " Soruları";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>@ViewBag.TagName ile Etiketlenen Sorular</h2>
-
-@if (Model.Any())
-{
-    foreach (var q in Model)
-    {
-        <div class="card mb-3 shadow-sm">
-            <div class="card-body">
-                <h5 class="card-title">@q.Title</h5>
-                <p class="card-text">@Html.Raw(q.Description.Substring(0, Math.Min(q.Description.Length, 200)) + "...")</p>
-                <a href="@Url.Action("Details", "Question", new { id = q.Id })" class="btn btn-sm btn-outline-primary">Detaylar</a>
-            </div>
-        </div>
+<!-- 🔹 Stil -->
+<style>
+    body {
+        background-color: #f4f7fc;
+        font-family: 'Segoe UI', sans-serif;
     }
-}
-else
-{
-    <div class="alert alert-info">Bu etikete ait henüz bir soru yok.</div>
-}
+
+    .sidebar {
+        width: 220px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        background-color: #fff;
+        border-right: 1px solid #dee2e6;
+        padding-top: 60px;
+        z-index: 1000;
+    }
+
+        .sidebar a {
+            display: block;
+            color: #333;
+            padding: 15px 20px;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+            .sidebar a:hover,
+            .sidebar a.active {
+                background-color: #e0eaff;
+                border-left: 4px solid #0d6efd;
+                color: #0d6efd;
+            }
+
+    .container-main {
+        margin-left: 240px;
+        padding: 30px;
+    }
+
+    .question-card {
+        background: linear-gradient(to top left, #ffffff, #f4f7fc);
+        border-radius: 12px;
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s;
+    }
+
+        .question-card:hover {
+            transform: scale(1.01);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .question-card .card-title {
+            font-size: 1.2rem;
+        }
+
+        .question-card .btn-outline-primary {
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+            .question-card .btn-outline-primary:hover {
+                background-color: #0d6efd;
+                color: #fff;
+                border-color: #0d6efd;
+            }
+</style>
+
+<!-- 🔹 Header ve Sidebar (ViewBag.Role ile) -->
+<div class="d-flex justify-content-end align-items-center mb-4 px-3" style="padding-top: 20px;">
+
+    <div class="d-flex align-items-center ms-3">
+        <a href="@Url.Action("ProfilePage", "User")" class="me-3">
+            <img src="@ViewBag.ProfileImageUrl" class="rounded-circle shadow" width="48" height="48" style="object-fit: cover; border: 2px solid #ccc;" />
+        </a>
+        <form action="@Url.Action("Logout", "User")" method="post">
+            <button type="submit" class="btn btn-outline-danger btn-sm">Log Out</button>
+        </form>
+    </div>
+</div>
+
+<div id="sidebar" class="col-md-2 sidebar">
+
+    <div class="text-center mb-4 fw-bold fs-4">💼 CodeBud</div>
+    <a href="@Url.Action("Index", "User")">🏠 Dashboard</a>
+    <a href="@Url.Action("Index", "Question")">💳 Questions</a>
+    <a href="@Url.Action("Index", "Tag")" class="active">📂 Tags</a>
+    @if (ViewBag.Role == "Admin")
+    {
+        <a href="@Url.Action("Index", "Admin")">🛠 Admin Panel</a>
+
+    }
+</div>
+<!-- 🔘 Ana İçerik -->
+<div class="container-main">
+    <h2 class="mb-4 fw-bold"><i class="bi bi-hash"></i>Questions tagged with @ViewBag.TagName</h2>
+
+    @if (Model.Any())
+    {
+        foreach (var q in Model)
+        {
+            <div class="card question-card mb-4 shadow-sm border-0">
+                <div class="card-body">
+                    <h5 class="card-title fw-semibold text-primary">
+                        <i class="bi bi-question-circle-fill me-1"></i> @q.Title
+                    </h5>
+                    <p class="card-text text-muted" style="white-space: pre-wrap;">
+                        @Html.Raw(q.Description.Length > 200 ? q.Description.Substring(0, 200) + "..." : q.Description)
+                    </p>
+                    <a href="@Url.Action("Details", "Question", new { id = q.Id })" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                        🔍 Details
+                    </a>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="alert alert-info">No questions found with this tag.</div>
+    }
+</div>

@@ -1,4 +1,6 @@
-﻿using MyProject.Web.Controllers;
+﻿using CodeBud.Helpers;
+using CodeBud.Models.Entities;
+using MyProject.Web.Controllers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +14,7 @@ namespace CodeBud.Controllers
         // GET: Tag
         public ActionResult Index()
         {
+            GetUser();
             var db = AccountController._db;
             var tags = db.Tags.ToList();
             return View(tags); // Views/Tag/Index.cshtml
@@ -19,6 +22,7 @@ namespace CodeBud.Controllers
 
         public ActionResult ByTag(int id)
         {
+            GetUser();
             var db = AccountController._db;
 
             var questions = db.QuestionTags
@@ -31,6 +35,20 @@ namespace CodeBud.Controllers
 
             return View("ByTag", questions);
         }
+        public UserModel GetUser()
+        {
+            var user = JwtHelper.GetCurrentUserFromToken();
+            ViewBag.Username = user?.Username;
+            ViewBag.Role = user?.Role;
 
+            string virtualPath = string.IsNullOrEmpty(user.ImageURL) ? "~/Photos/default.jpg" : user.ImageURL;
+            string physicalPath = Server.MapPath(virtualPath);
+
+            ViewBag.ProfileImageUrl = System.IO.File.Exists(physicalPath)
+                ? Url.Content(virtualPath)
+                : "https://via.placeholder.com/150";
+
+            return user;
+        }
     }
 }

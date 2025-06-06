@@ -34,11 +34,9 @@ public class PermissionAuthorizeAttribute : AuthorizeAttribute
 
             bool hasPermission = _requiredPermissions.All(rp => userPermissions.Contains(rp));
 
-            // Eğer yetki varsa geç
             if (hasPermission)
                 return;
 
-            // ↓↓↓ ÖZEL DURUM: Kullanıcı kendi içeriğini silmek istiyorsa geç
             var routeData = filterContext.RouteData;
             string controller = routeData.Values["controller"].ToString().ToLower();
             string action = routeData.Values["action"].ToString().ToLower();
@@ -50,11 +48,31 @@ public class PermissionAuthorizeAttribute : AuthorizeAttribute
                 {
                     var question = db.Questions.FirstOrDefault(q => q.Id == questionId);
                     if (question != null && question.UserId == currentUser.Id)
-                        return; // kendi sorusu ⇒ izin ver
+                        return;
+
+                    if (currentUser.Role.ToLower() == "admin")
+                        return;
                 }
             }
 
-            // Yetkisi yoksa engelle
+            if (controller == "question" && action == "deletecomment")
+            {
+                int commentId;
+                if (int.TryParse(filterContext.HttpContext.Request["id"], out commentId))
+                {
+                    var comment = db.Comments
+                                    .Include("Question")
+                                    .FirstOrDefault(c => c.Id == commentId);
+
+                    if (comment != null)
+                    {
+                        if (comment.UserId == currentUser.Id) return;
+                        if (comment.Question != null && comment.Question.UserId == currentUser.Id) return;
+                        if (currentUser.Role.ToLower() == "admin") return;
+                    }
+                }
+            }
+
             filterContext.Result = new RedirectResult("/Account/AccessDenied");
         }
     }

@@ -7,22 +7,136 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container mt-4">
+<!-- CSS -->
+<style>
+    body {
+        font-family: 'Segoe UI', sans-serif;
+        background-color: #f4f7fc;
+    }
+
+    .sidebar {
+        width: 220px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        background-color: #fff;
+        border-right: 1px solid #dee2e6;
+        padding-top: 60px; /* header yüksekliğine göre */
+        z-index: 1000;
+    }
+
+
+        .sidebar a {
+            display: block;
+            color: #333;
+            padding: 15px 20px;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+            .sidebar a:hover, .sidebar a.active {
+                background-color: #e0eaff;
+                border-left: 4px solid #0d6efd;
+                color: #0d6efd;
+            }
+
+    .card {
+        border: none;
+        border-left: 5px solid #0d6efd;
+        transition: box-shadow 0.3s ease;
+    }
+
+        .card:hover {
+            box-shadow: 0 0 10px rgba(13, 110, 253, 0.2);
+        }
+
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .card-text {
+        color: #495057;
+    }
+
+    .vote-btn {
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        font-size: 1rem;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .pagination .page-item .page-link {
+        color: #0d6efd;
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+    .pagination {
+        margin-top: 40px;
+    }
+
+    .container-main {
+        margin-left: 240px;
+        padding: 30px;
+    }
+
+    .btn-sm {
+        font-size: 0.875rem;
+        padding: 6px 12px;
+    }
+</style>
+
+<!-- 🔹 Header ve Sidebar (ViewBag.Role ile) -->
+<div class="d-flex justify-content-end align-items-center mb-4 px-3" style="padding-top: 20px;">
+
+    <div class="d-flex align-items-center ms-3">
+        <a href="@Url.Action("ProfilePage", "User")" class="me-3">
+            <img src="@ViewBag.ProfileImageUrl" class="rounded-circle shadow" width="48" height="48" style="object-fit: cover; border: 2px solid #ccc;" />
+        </a>
+        <form action="@Url.Action("Logout", "User")" method="post">
+            <button type="submit" class="btn btn-outline-danger btn-sm">Log Out</button>
+        </form>
+    </div>
+</div>
+
+<div id="sidebar" class="col-md-2 sidebar">
+
+    <div class="text-center mb-4 fw-bold fs-4">💼 CodeBud</div>
+    <a href="@Url.Action("Index", "User")">🏠 Dashboard</a>
+    <a href="@Url.Action("Index", "Question")" class="active">💳 Questions</a>
+    <a href="@Url.Action("Index", "Tag")">📂 Tags</a>
+    @if (ViewBag.Role == "Admin")
+    {
+        <a href="@Url.Action("Index", "Admin")">🛠 Admin Panel</a>
+
+    }
+</div>
+
+<!-- 🔘 Main Content -->
+<div class="container-main">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0">📋 Son Sorular</h2>
-        <a class="btn btn-primary" href="@Url.Action("Create", "Question")">➕ Yeni Soru Ekle</a>
+        <h2 class="mb-0">📋 Latest Questions</h2>
+        <a class="btn btn-primary" href="@Url.Action("Create", "Question")">➕ Add a New Question</a>
     </div>
 
     @foreach (var q in Model)
     {
-
         <div class="card mb-3 shadow-sm">
             <div class="card-body">
                 <h5 class="card-title">@q.Title</h5>
 
                 <p class="card-text text-muted small">
-                    Soruldu: @q.CreatedAt.ToString("g")
+                    Asked: @q.CreatedAt.ToString("g")
                 </p>
 
                 <p>
@@ -30,26 +144,19 @@
                 </p>
 
                 <div class="d-flex justify-content-between">
-                    <a href="@Url.Action("Details", "Question", new { id = q.Id })" class="btn btn-sm btn-outline-primary">Detaylar</a>
+                    <a href="@Url.Action("Details", "Question", new { id = q.Id })" class="btn btn-sm btn-outline-primary">Details</a>
 
                     <div>
                         @{
-                            var userVotes = ViewBag.UserVotes as List<CodeBud.Models.Entities.Vote>
-                                ;
+                            var userVotes = ViewBag.UserVotes as List<CodeBud.Models.Entities.Vote>;
                             var userVote = userVotes?.FirstOrDefault(v => v.QuestionId == q.Id);
                             var votedType = userVote == null ? "none" : (userVote.IsUpvote ? "up" : "down");
                         }
-                        <button class="btn btn-sm btn-outline-success vote-btn me-1"
-                                data-id="@q.Id" data-up="true" data-voted="@votedType">
-                            ⬆
-                        </button>
+                        <button class="btn btn-sm btn-outline-success vote-btn me-1" data-id="@q.Id" data-up="true" data-voted="@votedType">⬆</button>
                         <span id="vote-count-@q.Id">@q.VoteCount</span>
-                        <button class="btn btn-sm btn-outline-danger vote-btn ms-1"
-                                data-id="@q.Id" data-up="false" data-voted="@votedType">
-                            ⬇
-                        </button>
-
+                        <button class="btn btn-sm btn-outline-danger vote-btn ms-1" data-id="@q.Id" data-up="false" data-voted="@votedType">⬇</button>
                     </div>
+
                     @if (ViewBag.CurrentUserId != null)
                     {
                         bool isOwner = (q.UserId == (int)ViewBag.CurrentUserId);
@@ -57,18 +164,16 @@
 
                         if (isOwner || isAdmin)
                         {
-                            <form method="post" action="@Url.Action("Delete", "Question")" onsubmit="return confirm('Bu soruyu silmek istediğinizden emin misiniz?');" class="d-inline">
+                            <form method="post" action="@Url.Action("Delete", "Question")" onsubmit="return confirm('Are you sure about deleting the comment?');" class="d-inline">
                                 <input type="hidden" name="id" value="@q.Id" />
-                                <button type="submit" class="btn btn-sm btn-danger ms-2">🗑 Sil</button>
+                                <button type="submit" class="btn btn-sm btn-danger ms-2">🗑 Delete</button>
                             </form>
                         }
                     }
                 </div>
-
             </div>
         </div>
     }
-
 
     <div class="text-center mt-4">
         @Html.PagedListPager(Model, page => Url.Action("Index", new { page }),
@@ -84,24 +189,21 @@
             })
     </div>
 </div>
+
+<!-- 🔻 JS: Vote işleme -->
 <script>
-    // Sayfa yüklendiğinde butonları boyama
     window.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.vote-btn').forEach(btn => {
             const voteType = btn.dataset.voted;
             const isUp = btn.dataset.up === "true";
-
             if (voteType === "up" && isUp) {
-                btn.classList.remove("btn-outline-success");
-                btn.classList.add("btn-success");
+                btn.classList.replace("btn-outline-success", "btn-success");
             } else if (voteType === "down" && !isUp) {
-                btn.classList.remove("btn-outline-danger");
-                btn.classList.add("btn-danger");
+                btn.classList.replace("btn-outline-danger", "btn-danger");
             }
         });
     });
 
-    // Tıklama işlemi
     document.querySelectorAll('.vote-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
             const questionId = btn.dataset.id;
@@ -124,31 +226,22 @@
                 const upBtn = document.querySelector(`.vote-btn[data-id="${questionId}"][data-up="true"]`);
                 const downBtn = document.querySelector(`.vote-btn[data-id="${questionId}"][data-up="false"]`);
 
-                // Tüm renkleri temizle
                 upBtn.classList.remove("btn-success", "btn-outline-success");
                 downBtn.classList.remove("btn-danger", "btn-outline-danger");
 
-                // Default outline'ı geri ekle
                 upBtn.classList.add("btn-outline-success");
                 downBtn.classList.add("btn-outline-danger");
 
-                // 🔥 Backend'den gelen oylama durumuna göre güncelle
                 const voteStatus = result.voteStatus;
-
                 if (voteStatus === "up") {
-                    upBtn.classList.remove("btn-outline-success");
-                    upBtn.classList.add("btn-success");
+                    upBtn.classList.replace("btn-outline-success", "btn-success");
                     upBtn.dataset.voted = "up";
                     downBtn.dataset.voted = "none";
-                }
-                else if (voteStatus === "down") {
-                    downBtn.classList.remove("btn-outline-danger");
-                    downBtn.classList.add("btn-danger");
+                } else if (voteStatus === "down") {
+                    downBtn.classList.replace("btn-outline-danger", "btn-danger");
                     downBtn.dataset.voted = "down";
                     upBtn.dataset.voted = "none";
-                }
-                else if (voteStatus === "none") {
-                    // Oy kaldırıldıysa
+                } else {
                     upBtn.dataset.voted = "none";
                     downBtn.dataset.voted = "none";
                 }
@@ -158,5 +251,3 @@
         });
     });
 </script>
-
-

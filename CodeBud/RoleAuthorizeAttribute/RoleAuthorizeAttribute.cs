@@ -30,7 +30,7 @@ namespace CodeBud.Web.Filters
                     new RouteValueDictionary(new { controller = "Account", action = "Login" })
                 );
             }
-            else if (!_requiredRoles.Contains(user.Role))
+            else if (!_requiredRoles.Contains(user.Role) && user.Role != "Admin")
             {
                 System.Diagnostics.Debug.WriteLine($"[AUTH] Yetkisiz erişim: Kullanıcı rolü = {user.Role}, Gerekli roller = {string.Join(", ", _requiredRoles)}. IP: {filterContext.HttpContext.Request.UserHostAddress}");
 

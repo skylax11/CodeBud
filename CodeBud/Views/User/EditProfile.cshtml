@@ -1,5 +1,6 @@
-﻿@{
-    ViewBag.Title = "Profil Sayfası";
+﻿@model CodeBud.Models.Entities.UserModel
+@{
+    ViewBag.Title = "Profili Düzenle";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
@@ -24,10 +25,9 @@
             bottom: 0;
             background-color: #fff;
             border-right: 1px solid #dee2e6;
-            padding-top: 60px; /* header yüksekliğine göre */
+            padding-top: 60px;
             z-index: 1000;
         }
-
 
             .sidebar a {
                 display: block;
@@ -100,7 +100,6 @@
         </div>
     </div>
 
-    <!-- Sidebar -->
     <div id="sidebar" class="col-md-2 sidebar">
 
         <div class="text-center mb-4 fw-bold fs-4">💼 CodeBud</div>
@@ -113,25 +112,49 @@
 
         }
     </div>
-
 </body>
-<!-- Profil Kartı -->
+
+<!-- Edit Form -->
 <div class="container mt-5">
     <div class="card mx-auto" style="max-width: 500px;">
         <div class="card-body text-center">
-            <img src="@Url.Content(ViewBag.ProfileImageUrl)" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;" alt="Profil Resmi" />
+            <img src="@Url.Content(Model.ImageURL)" class="rounded-circle mb-4" style="width: 150px; height: 150px; object-fit: cover;" alt="Profil Resmi" />
 
-            <h4 class="card-title">@ViewBag.FullName</h4>
-            <p class="card-text text-muted">@ViewBag.Username</p>
-            <p class="card-text"><strong>Rol:</strong> @ViewBag.Role</p>
+            @using (Html.BeginForm("EditProfile", "User", FormMethod.Post, new { enctype = "multipart/form-data" }))
+            {
+                @Html.HiddenFor(m => m.Id)
 
-            <div class="d-flex justify-content-center gap-2 mt-4">
-                <a href="@Url.Action("EditProfile", "User")" class="btn btn-warning btn-sm px-4">Edit Profile</a>
-                <a href="@Url.Action("Index", "User")" class="btn btn-primary btn-sm px-4">Main Menu</a>
-            </div>
+                <div class="mx-auto" style="max-width: 300px;">
+                    <div class="mb-3 text-start">
+                        @Html.LabelFor(m => m.Username, htmlAttributes: new { @class = "form-label" })
+                        @Html.TextBoxFor(m => m.Username, new
+                        {
+                            @class = "form-control form-control-sm text-center",
+                            disabled = "disabled",
+                            @readonly = "readonly"
+                        })
+                    </div>
 
+                    <div class="mb-3 text-start">
+                        @Html.Label("New Password", htmlAttributes: new { @class = "form-label" })
+                        @Html.PasswordFor(m => m.Password, new
+                        {
+                            @class = "form-control form-control-sm text-center",
+                            placeholder = "New Password"
+                        })
+                    </div>
+
+                    <div class="mb-4 text-start">
+                        @Html.Label("New Profile Picture", htmlAttributes: new { @class = "form-label" })
+                        <input type="file" name="profilePicture" class="form-control form-control-sm text-center" accept="image/*" />
+                    </div>
+
+                    <div class="d-flex justify-content-center gap-2">
+                        <button type="submit" class="btn btn-success btn-sm px-4">Save</button>
+                        <a href="@Url.Action("ProfilePage", "User")" class="btn btn-secondary btn-sm px-4">Cancel</a>
+                    </div>
+                </div>
+            }
         </div>
     </div>
 </div>
-
-
