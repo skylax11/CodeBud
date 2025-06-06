@@ -20,6 +20,6 @@ namespace CodeBud.DbContext
         public DbSet<Tag> Tags { get; set; }
         public DbSet<QuestionTagMatch> QuestionTags { get; set; }
         public DbSet<QuestionVoteMatch> QuestionVote { get; set; }
-
+        public DbSet<Permission> Permissions { get; set; }
     }
 }
