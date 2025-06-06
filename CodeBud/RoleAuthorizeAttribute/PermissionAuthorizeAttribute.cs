@@ -3,6 +3,7 @@ using System.Web.Mvc;
 using CodeBud.Models.Entities;
 using CodeBud.DbContext;
 using CodeBud.SessionService;
+using CodeBud.Helpers;
 
 public class PermissionAuthorizeAttribute : AuthorizeAttribute
 {
@@ -16,7 +17,7 @@ public class PermissionAuthorizeAttribute : AuthorizeAttribute
     public override void OnAuthorization(AuthorizationContext filterContext)
     {
         var sessionService = new SessionService();
-        var currentUser = sessionService.GetCurrentUser();
+        var currentUser = JwtHelper.GetCurrentUserFromToken();
 
         if (currentUser == null)
         {

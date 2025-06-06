@@ -8,6 +8,8 @@ using MyProject.Web.Controllers;
 using System.Threading.Tasks;
 using CodeBud.DbContext;
 using CodeBud.Helpers; // JWT Helper burada
+using CodeBud.SessionService;
+using CodeBud.Models.Entities;
 
 namespace CodeBud.Controllers
 {
@@ -16,16 +18,8 @@ namespace CodeBud.Controllers
     {
         public ActionResult Index()
         {
-            var user = JwtHelper.GetCurrentUserFromToken();
-            ViewBag.Username = user?.Username;
-            ViewBag.Role = user?.Role;
+            var user = GetUser();
 
-            string virtualPath = string.IsNullOrEmpty(user.ImageURL) ? "~/Photos/default.jpg" : user.ImageURL;
-            string physicalPath = Server.MapPath(virtualPath);
-
-            ViewBag.ProfileImageUrl = System.IO.File.Exists(physicalPath)
-                ? Url.Content(virtualPath)
-                : "https://via.placeholder.com/150";
 
             using (var db = new AppDbContext())
             {
@@ -68,16 +62,7 @@ namespace CodeBud.Controllers
 
         public ActionResult ProfilePage()
         {
-            var user = JwtHelper.GetCurrentUserFromToken();
-            ViewBag.Username = user?.Username;
-            ViewBag.Role = user?.Role;
-
-            string virtualPath = string.IsNullOrEmpty(user.ImageURL) ? "~/Photos/default.jpg" : user.ImageURL;
-            string physicalPath = Server.MapPath(virtualPath);
-
-            ViewBag.ProfileImageUrl = System.IO.File.Exists(physicalPath)
-                ? Url.Content(virtualPath)
-                : "https://via.placeholder.com/150";
+            GetUser();
 
             return View();
         }
@@ -108,6 +93,36 @@ namespace CodeBud.Controllers
             }
 
             return RedirectToAction("ProfilePage");
+        }
+
+        public ActionResult Details(int id)
+        {
+            ViewBag.User = GetUser();
+
+            using (var db = new AppDbContext())
+            {
+                var targetUser = db.Users.FirstOrDefault(u => u.Id == id);
+                if (targetUser == null)
+                    return HttpNotFound();
+
+                return View(targetUser);
+            }
+        }
+
+        public UserModel GetUser()
+        {
+            var user = JwtHelper.GetCurrentUserFromToken();
+            ViewBag.Username = user?.Username;
+            ViewBag.Role = user?.Role;
+
+            string virtualPath = string.IsNullOrEmpty(user.ImageURL) ? "~/Photos/default.jpg" : user.ImageURL;
+            string physicalPath = Server.MapPath(virtualPath);
+
+            ViewBag.ProfileImageUrl = System.IO.File.Exists(physicalPath)
+                ? Url.Content(virtualPath)
+                : "https://via.placeholder.com/150";
+
+            return user;
         }
 
         public ActionResult Logout()
