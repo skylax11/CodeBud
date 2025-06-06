@@ -1,23 +1,114 @@
 ﻿@model List<CodeBud.Models.Entities.Tag>
-
 @{
     ViewBag.Title = "Etiketler";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2 class="mb-4">📌 Tüm Etiketler</h2>
+<!-- 🔹 Stil -->
+<style>
+    body {
+        background-color: #f4f7fc;
+        font-family: 'Segoe UI', sans-serif;
+    }
 
-<div class="row">
-    @foreach (var tag in Model)
+    .sidebar {
+        width: 220px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        background-color: #fff;
+        border-right: 1px solid #dee2e6;
+        padding-top: 60px;
+        z-index: 1000;
+    }
+
+        .sidebar a {
+            display: block;
+            color: #333;
+            padding: 15px 20px;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+            .sidebar a:hover,
+            .sidebar a.active {
+                background-color: #e0eaff;
+                border-left: 4px solid #0d6efd;
+                color: #0d6efd;
+            }
+
+    .container-main {
+        margin-left: 240px;
+        padding: 30px;
+    }
+
+    .tag-card {
+        background: linear-gradient(to top left, #f8f9fa, #ffffff);
+        border-radius: 12px;
+        transition: all 0.3s ease-in-out;
+    }
+
+        .tag-card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+            background: linear-gradient(to top right, #e9f5ff, #ffffff);
+        }
+
+        .tag-card .card-title {
+            font-size: 1.2rem;
+            color: #0d6efd;
+        }
+
+        .tag-card .btn-outline-primary {
+            border-radius: 20px;
+            font-weight: 500;
+        }
+</style>
+
+<!-- 🔹 Header ve Sidebar (ViewBag.Role ile) -->
+<div class="d-flex justify-content-end align-items-center mb-4 px-3" style="padding-top: 20px;">
+
+    <div class="d-flex align-items-center ms-3">
+        <a href="@Url.Action("ProfilePage", "User")" class="me-3">
+            <img src="@ViewBag.ProfileImageUrl" class="rounded-circle shadow" width="48" height="48" style="object-fit: cover; border: 2px solid #ccc;" />
+        </a>
+        <form action="@Url.Action("Logout", "User")" method="post">
+            <button type="submit" class="btn btn-outline-danger btn-sm">Log Out</button>
+        </form>
+    </div>
+</div>
+
+<div id="sidebar" class="col-md-2 sidebar">
+
+    <div class="text-center mb-4 fw-bold fs-4">💼 CodeBud</div>
+    <a href="@Url.Action("Index", "User")">🏠 Dashboard</a>
+    <a href="@Url.Action("Index", "Question")">💳 Questions</a>
+    <a href="@Url.Action("Index", "Tag")" class="active">📂 Tags</a>
+    @if (ViewBag.Role == "Admin")
     {
-        <div class="col-md-3 mb-3">
-            <div class="card shadow-sm h-100">
-                <div class="card-body text-center">
-                    <h5 class="card-title">@tag.TagName</h5>
-                    <a href="@Url.Action("ByTag", "Tag", new { id = tag.TagId })" class="btn btn-sm btn-outline-primary">
-                        Soruları Gör
-                    </a>
+        <a href="@Url.Action("Index", "Admin")">🛠 Admin Panel</a>
+
+    }
+</div>
+
+<!-- 🔘 Ana İçerik -->
+<div class="container-main">
+    <h2 class="mb-4 fw-bold"><i class="bi bi-tags-fill"></i> Tags</h2>
+
+    <div class="row">
+        @foreach (var tag in Model)
+        {
+            <div class="col-md-3 col-sm-6 mb-4">
+                <div class="tag-card card border-0 shadow-sm h-100 text-center p-3">
+                    <div class="card-body d-flex flex-column justify-content-between">
+                        <h5 class="card-title fw-semibold text-primary">#@tag.TagName</h5>
+                        <a href="@Url.Action("ByTag", "Tag", new { id = tag.TagId })" class="btn btn-sm btn-outline-primary mt-3">
+                            See Questions
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
-    }
+        }
+    </div>
 </div>

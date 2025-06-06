@@ -71,6 +71,7 @@
             top: 20px;
             right: 30px;
         }
+
         .rounded-icon {
             width: 50px;
             height: 50px;
@@ -86,36 +87,39 @@
 </head>
 <body>
 
-    <!-- 🔹 Header Bar: Search + Profile -->
-    <div class="d-flex justify-content-between align-items-center mb-4 px-3" style="padding-top: 20px;">
-        <!-- Search Bar (Ortalanmış) -->
-        <div class="flex-grow-1 d-flex justify-content-center">
-            <form class="d-flex" method="get" action="@Url.Action("Search", "Question")" style="width: 100%; max-width: 600px;">
-                <input class="form-control form-control-lg me-2" type="search" name="query" placeholder="Sorularda ara..." aria-label="Search" />
-                <button class="btn btn-primary btn-lg" type="submit">Ara</button>
-            </form>
-        </div>
+    <<!-- 🔹 Header ve Sidebar (ViewBag.Role ile) -->
+    <div class="d-flex justify-content-end align-items-center mb-4 px-3" style="padding-top: 20px;">
 
-        <!-- Profil Fotoğrafı ve Log Out (Sağ Üst) -->
         <div class="d-flex align-items-center ms-3">
-            <a href="@Url.Action("ProfilePage", "User")" title="Profil Sayfası" class="me-3">
-                <img src="@ViewBag.ProfileImageUrl" alt="Profil" class="rounded-circle shadow" width="48" height="48" style="object-fit: cover; border: 2px solid #ccc;" />
+            <a href="@Url.Action("ProfilePage", "User")" class="me-3">
+                <img src="@ViewBag.ProfileImageUrl" class="rounded-circle shadow" width="48" height="48" style="object-fit: cover; border: 2px solid #ccc;" />
             </a>
             <form action="@Url.Action("Logout", "User")" method="post">
-                <button type="submit" class="btn btn-outline-danger btn-sm">Çıkış Yap</button>
+                <button type="submit" class="btn btn-outline-danger btn-sm">Log Out</button>
             </form>
         </div>
-
     </div>
 
+    <!-- ☰ Sidebar Toggle Butonu -->
+    <button id="sidebarToggleBtn"
+            class="btn btn-outline-secondary position-fixed shadow-sm"
+            style="top: 20px; left: 20px; z-index: 1100; padding: 4px 10px; font-size: 18px; border-radius: 6px;">
+        ☰
+    </button>
 
     <div class="row g-0">
-        <!-- Sidebar -->
-        <div class="col-md-2 sidebar">
+
+        <div id="sidebar" class="col-md-2 sidebar">
+
             <div class="text-center mb-4 fw-bold fs-4">💼 CodeBud</div>
             <a href="@Url.Action("Index", "User")" class="active">🏠 Dashboard</a>
             <a href="@Url.Action("Index", "Question")">💳 Questions</a>
             <a href="@Url.Action("Index", "Tag")">📂 Tags</a>
+            @if (ViewBag.Role == "Admin")
+            {
+                <a href="@Url.Action("Index", "Admin")">🛠 Admin Panel</a>
+
+            }
         </div>
 
         <!-- Main Content -->
@@ -127,7 +131,7 @@
                     <div class="card p-4 mb-4">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <span>📝 My Questions</span>
-                            <a href="@Url.Action("Index", "Question")" class="btn btn-sm btn-outline-primary">Tüm Sorular</a>
+                            <a href="@Url.Action("Index", "Question")" class="btn btn-sm btn-outline-primary">All Questions</a>
                         </div>
 
                         @if (ViewBag.MyQuestions != null && ((List<CodeBud.Models.Entities.Question>)ViewBag.MyQuestions).Any())
@@ -141,7 +145,7 @@
                                             <small class="text-muted">@q.CreatedAt.ToShortDateString()</small>
                                         </div>
                                         <a class="btn btn-sm btn-primary" href="@Url.Action("Details", "Question", new { id = q.Id })">
-                                            Görüntüle
+                                            Display
                                         </a>
                                     </li>
                                 }
@@ -149,13 +153,13 @@
                         }
                         else
                         {
-                            <div class="text-muted mt-3">Henüz bir soru paylaşmadınız.</div>
+                            <div class="text-muted mt-3">You haven't posted yet.</div>
                         }
                     </div>
 
                     <!-- 🔹 Diğer Kullanıcıların Soruları -->
                     <div class="card p-4">
-                        <div class="card-header fw-bold">🌐 Diğer Kullanıcıların Soruları</div>
+                        <div class="card-header fw-bold">🌐 Questions from other users</div>
 
                         @if (ViewBag.OtherQuestions != null && ((List<CodeBud.Models.Entities.Question>)ViewBag.OtherQuestions).Any())
                         {
@@ -168,14 +172,14 @@
                                         <p>
                                             @Html.Raw(q.Description.Length > 150 ? q.Description.Substring(0, 150) + "..." : q.Description)
                                         </p>
-                                        <a href="@Url.Action("Details", "Question", new { id = q.Id })" class="btn btn-sm btn-outline-primary">Detaylar</a>
+                                        <a href="@Url.Action("Details", "Question", new { id = q.Id })" class="btn btn-sm btn-outline-primary">Details</a>
                                     </div>
                                 </div>
                             }
                         }
                         else
                         {
-                            <div class="text-muted mt-3">Henüz başka kullanıcıdan soru bulunamadı.</div>
+                            <div class="text-muted mt-3">No questions found by other users.</div>
                         }
                     </div>
 
@@ -286,3 +290,15 @@
 </script>
 
 
+<script>
+    const sidebar = document.getElementById("sidebar");
+    const sidebarToggleBtn = document.getElementById("sidebarToggleBtn");
+
+    sidebarToggleBtn.addEventListener("click", () => {
+        if (sidebar.style.display === "none") {
+            sidebar.style.display = "block";
+        } else {
+            sidebar.style.display = "none";
+        }
+    });
+</script>

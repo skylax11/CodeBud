@@ -16,6 +16,8 @@ namespace CodeBud.Controllers
     {
         public ActionResult Index(int? page)
         {
+            GetUser();
+
             int pageSize = 5;
             int pageNumber = page ?? 1;
 
@@ -30,6 +32,7 @@ namespace CodeBud.Controllers
 
                 ViewBag.CurrentUserId = currentUser?.Id;
                 ViewBag.CurrentUserRole = currentUser?.Role;
+                ViewBag.CurrentUser = currentUser;
 
                 // 🔥 Kullanıcının verdiği oyları da çek
                 var userVotes = db.Votes
@@ -44,7 +47,7 @@ namespace CodeBud.Controllers
 
         public ActionResult Create()
         {
-            ViewBag.User = GetUser();
+            ViewBag.CurrentUser = GetUser();
 
             var db = AccountController._db; // 👈 dispose etme, zaten global
             
@@ -101,6 +104,9 @@ namespace CodeBud.Controllers
         [PermissionAuthorize("CanDeleteQuestion")]
         public ActionResult Delete(int id)
         {
+            var user = JwtHelper.GetCurrentUserFromToken();
+            ViewBag.CurrentUser = user;
+
             using (var db = new AppDbContext())
             {
                 var question = db.Questions.FirstOrDefault(q => q.Id == id);
@@ -132,11 +138,33 @@ namespace CodeBud.Controllers
         }
 
 
+        [HttpPost]
+        [PermissionAuthorize("CanDeleteComment")]
+        public ActionResult DeleteComment(int id)
+        {
+            var user = JwtHelper.GetCurrentUserFromToken();
+            ViewBag.CurrentUser = user;
+
+            using (var db = new AppDbContext())
+            {
+                var comment = db.Comments.FirstOrDefault(c => c.Id == id);
+                if (comment == null) return HttpNotFound();
+
+                int questionId = comment.QuestionId;
+
+                db.Comments.Remove(comment);
+                db.SaveChanges();
+
+                return RedirectToAction("Details", "Question", new { id = questionId });
+            }
+        }
 
         public ActionResult Details(int id)
         {
-            var currentUser = JwtHelper.GetCurrentUserFromToken();
-            ViewBag.User = currentUser;
+            var user = JwtHelper.GetCurrentUserFromToken();
+            ViewBag.CurrentUser = user;
+
+            GetUser();
 
             using (var db = new AppDbContext())
             {
@@ -152,6 +180,7 @@ namespace CodeBud.Controllers
             }
 
         }
+
         [HttpPost]
         [ValidateInput(false)]
 
@@ -182,6 +211,7 @@ namespace CodeBud.Controllers
         public UserModel GetUser()
         {
             var user = JwtHelper.GetCurrentUserFromToken();
+            ViewBag.CurrentUser = user;
             ViewBag.Username = user?.Username;
             ViewBag.Role = user?.Role;
 

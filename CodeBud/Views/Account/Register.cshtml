@@ -1,31 +1,53 @@
-@model CodeBud.Models.Entities.UserModel
+﻿@model CodeBud.Models.Entities.UserModel
 
 @{
     ViewBag.Title = "Kayıt Ol";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>Kayıt Ol</h2>
+<div class="container-fluid min-vh-100 d-flex justify-content-center align-items-center bg-light">
+    <div class="card shadow p-4" style="width: 100%; max-width: 400px;">
+        <div class="text-center mb-4">
+            <h2 class="fw-bold text-success">Register</h2>
+            <p class="text-muted">Please fill the blanks.</p>
+        </div>
 
-@using (Html.BeginForm("Register", "Account", FormMethod.Post))
-{
+        @using (Html.BeginForm("Register", "Account", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
 
-    @Html.AntiForgeryToken()
+            <div class="mb-3">
+                <label class="form-label">Username</label>
+                @Html.TextBoxFor(m => m.Username, new { @class = "form-control", placeholder = "kullaniciadi123", required = "required" })
+            </div>
 
-    <label>Kullanıcı Adı:</label>
-    @Html.TextBoxFor(m => m.Username)
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "••••••••", required = "required" })
+            </div>
 
-    <label>Şifre:</label>
-    @Html.PasswordFor(m => m.Password)
+            <div class="mb-3">
+                <label class="form-label">E-mail</label>
+                @Html.TextBoxFor(m => m.Email, new { @class = "form-control", placeholder = "ornek@site.com", required = "required" })
+            </div>
 
-    <label>Şifre:</label>
-    @Html.TextBoxFor(m => m.Email)
+            if (!string.IsNullOrEmpty(ViewBag.Error as string))
+            {
+                <div class="alert alert-danger text-center" role="alert">
+                    @ViewBag.Error
+                </div>
+            }
 
-    <label>Rol:</label>
-    @Html.DropDownListFor(m => m.Role, new SelectList(new[] { "User", "Admin" }))
+            <div class="d-grid">
+                <button type="submit" class="btn btn-success">Register</button>
+            </div>
+        }
 
-    <br />
-    <br />
-    <input type="submit" value="Kayıt Ol" />
+        <hr class="my-4" />
 
-    <p style="color:red">@ViewBag.Error</p>
-}
+        <div class="text-center">
+            <p class="mb-2">Already have an account?</p>
+            <a href="@Url.Action("Login", "Account")" class="btn btn-outline-secondary w-100">Log In</a>
+        </div>
+    </div>
+</div>

@@ -1,5 +1,7 @@
-﻿@{
-    ViewBag.Title = "Admin Paneli";
+﻿@model CodeBud.Models.Entities.UserModel
+
+@{
+    ViewBag.Title = "Kullanıcı Detayları";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
@@ -7,7 +9,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Dashboard | CodeBud</title>
+    <title>Kullanıcı Detayları</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <style>
@@ -62,12 +64,12 @@
 </head>
 <body>
 
-    <!-- 🔹 Header ve Sidebar (ViewBag.Role ile) -->
+    <!-- 🔹 Header -->
     <div class="d-flex justify-content-end align-items-center mb-4 px-3" style="padding-top: 20px;">
 
         <div class="d-flex align-items-center ms-3">
             <a href="@Url.Action("ProfilePage", "User")" class="me-3">
-                <img src="@ViewBag.ProfileImageUrl" class="rounded-circle shadow" width="48" height="48" style="object-fit: cover; border: 2px solid #ccc;" />
+                <img src="@ViewBag.ProfileImageUrl" alt="Profil" class="rounded-circle shadow" width="48" height="48" style="object-fit: cover; border: 2px solid #ccc;" />
             </a>
             <form action="@Url.Action("Logout", "User")" method="post">
                 <button type="submit" class="btn btn-outline-danger btn-sm">Log Out</button>
@@ -75,42 +77,43 @@
         </div>
     </div>
 
-    <!-- 🔹 Sidebar + Content -->
-    <div class="row g-0">
-        <!-- Sidebar -->
-        <div class="col-md-2 sidebar" id="sidebar">
-            <div class="text-center mb-4 fw-bold fs-4">💼 CodeBud</div>
-            <a href="@Url.Action("Index", "User")">🏠 Dashboard</a>
-            <a href="@Url.Action("Index", "Question")">💳 Questions</a>
-            <a href="@Url.Action("Index", "Tag")">📂 Tags</a>
-            <a href="@Url.Action("Index", "Admin")" class="active">🛠 Admin Panel</a>
-            <a href="@Url.Action("ManageUsers", "Admin")">👥 User Management</a>
-        </div>
+    <!-- 🔹 Sidebar -->
+    <div class="col-md-2 sidebar">
+        <div class="text-center mb-4 fw-bold fs-4">💼 CodeBud</div>
+        <a href="@Url.Action("Index", "User")">🏠 Dashboard</a>
+        <a href="@Url.Action("Index", "Question")">💳 Questions</a>
+        <a href="@Url.Action("Index", "Tag")">📂 Tags</a>
+        <a href="@Url.Action("Index", "Admin")">🛠 Admin Panel</a>
+        <a href="@Url.Action("ManageUsers", "Admin")" class="active">👥 User Management</a>
+    </div>
 
-        <!-- Main Content -->
-        <div class="col-md-10 content">
-            <div class="row mb-4">
-                <div class="col-md-12">
-                    <div class="card p-4">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            🛠 Admin Panel
-                            <span class="badge bg-secondary">Rol: @ViewBag.Role</span>
-                        </div>
+    <!-- 🔹 Main Content -->
+    <div class="col-md-10 content">
+        <div class="row mb-4">
+            <div class="col-md-8 offset-md-2">
+                <div class="card p-4">
+                    <div class="card-header">
+                        👤 User Details
+                    </div>
+                    <div class="card-body">
+                        <h4>@Model.Username</h4>
+                        <p class="text-muted">E-Mail: @Model.Email</p>
+                        <p class="text-muted">Role: @Model.Role</p>
 
-                        <div class="card-body">
-                            <p class="mb-3">Welcome, <strong>@ViewBag.Username</strong>!</p>
+                        <hr />
 
-                            <div class="d-flex flex-wrap gap-3">
-                                <a href="@Url.Action("Index", "Question")" class="btn btn-outline-primary">📋 See Questions</a>
-                                <a href="@Url.Action("ManageUsers", "Admin")" class="btn btn-outline-success">👥 Edit Users</a>
-                                <a href="@Url.Action("Index", "Tag")" class="btn btn-outline-info">🏷️ Edit Tags</a>
+                        <div class="d-flex justify-content-between">
+                            <a href="@Url.Action("ManageUsers", "Admin")" class="btn btn-secondary">← Back</a>
+                            <div>
+                                <a href="@Url.Action("Edit", "Admin", new { id = Model.Id })" class="btn btn-warning me-2">Edit</a>
+                                <a href="@Url.Action("Delete", "Admin", new { id = Model.Id })" class="btn btn-danger">Delete</a>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
     </div>
+
 </body>
 </html>
